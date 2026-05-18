@@ -1,0 +1,3093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Revenue Growth OS — AI-Powered Revenue Intelligence for Consumer Brands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<style>
+  :root{
+    --bg:#ffffff;
+    --bg-soft:#f7f6f3;
+    --ink:#111418;
+    --ink-soft:#3a3f47;
+    --muted:#6b7280;
+    --line:#e5e4df;
+    --line-strong:#cdccc6;
+    --brand:#c8102e;
+    --brand-deep:#9c0d24;
+    --nav:#0c0d10;
+    --nav-soft:#1a1c20;
+    --accent:#0c0d10;
+    --good:#1f7a4c;
+    --warn:#b87900;
+    --bad:#b3261e;
+    --chip:#f1ede4;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.45}
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer}
+  h1,h2,h3,h4{font-family:'Playfair Display',Georgia,serif;font-weight:700;letter-spacing:-0.01em;color:var(--ink);margin:0}
+  .serif{font-family:'Playfair Display',Georgia,serif}
+
+  /* ===== Top nav ===== */
+  .nav{
+    background:var(--nav);color:#fff;display:flex;align-items:center;justify-content:space-between;
+    padding:10px 28px;border-bottom:1px solid #000;
+  }
+  .nav-left{display:flex;align-items:center;gap:18px}
+  .nav-about{color:#bbb;font-size:12px;display:flex;align-items:center;gap:6px;cursor:pointer}
+  .nav-about::before{content:"";display:inline-block;width:14px;height:14px;border-radius:50%;border:1px solid #888;color:#888;text-align:center;line-height:13px;font-size:10px}
+  .brand{
+    background:var(--brand);color:#fff;font-weight:800;letter-spacing:.15em;font-size:13px;
+    padding:8px 14px;display:inline-flex;align-items:center;gap:8px;
+  }
+  .brand .dot{width:6px;height:6px;background:#fff;border-radius:50%;display:inline-block;margin-left:4px;opacity:.85}
+  .nav-right{display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.22em;color:#dcdcdc}
+  .nav-right .beta{background:var(--brand);color:#fff;font-size:10px;letter-spacing:.18em;padding:3px 8px;border-radius:3px;font-weight:700}
+
+  /* ===== Stepper ===== */
+  .stepper{
+    background:#fafaf8;border-bottom:1px solid var(--line);padding:18px 28px 14px;
+    display:grid;grid-template-columns:repeat(7,1fr);gap:8px;position:relative;
+  }
+  .stepper::before{
+    content:"";position:absolute;left:7%;right:7%;top:46px;height:1px;background:var(--line-strong);z-index:0;
+  }
+  .step{display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:1;text-align:center}
+  .step .icon{
+    width:46px;height:46px;border-radius:50%;background:#fff;border:1px solid var(--line-strong);
+    display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--ink);box-shadow:0 1px 0 rgba(0,0,0,.02);
+  }
+  .step.done .icon{background:#fff;border-color:var(--brand);color:var(--brand)}
+  .step.active .icon{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 0 0 4px rgba(200,16,46,.12)}
+  .step .label{font-size:12px;font-weight:600;color:var(--ink);letter-spacing:.02em}
+  .step .chip{
+    font-size:9px;letter-spacing:.18em;font-weight:700;color:#fff;background:var(--brand);
+    padding:2px 6px;border-radius:2px;margin-left:6px;vertical-align:middle;
+  }
+  .step .chip.optional{background:var(--ink);}
+  .step .sub{font-size:11px;color:var(--muted)}
+  .stepper .hide{
+    position:absolute;left:50%;transform:translateX(-50%);bottom:-12px;background:#fff;border:1px solid var(--line-strong);
+    border-radius:14px;padding:2px 10px;font-size:10px;letter-spacing:.12em;color:var(--muted);cursor:pointer;
+  }
+
+  /* ===== Workflow columns ===== */
+  .workflow{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:1px solid var(--line);
+  }
+  .col{padding:38px 36px 30px;border-right:1px solid var(--line)}
+  .col:last-child{border-right:0}
+  .step-tag{font-size:11px;letter-spacing:.22em;color:var(--muted);font-weight:700;margin-bottom:10px}
+  .col h2{font-size:36px;line-height:1.05;margin-bottom:14px}
+  .col p.lead{color:var(--ink-soft);font-size:13.5px;margin:0 0 22px;max-width:36ch}
+
+  /* ===== Dropzone ===== */
+  .drop{
+    display:block;
+    border:1.5px dashed var(--line-strong);background:#fafaf8;border-radius:6px;
+    padding:28px 18px;text-align:center;color:var(--ink);transition:all .15s;cursor:pointer;
+  }
+  .drop:hover, .drop.dragover{border-color:var(--brand);background:#fff7f7}
+  .drop .glyph{font-size:34px;margin-bottom:10px;color:var(--brand)}
+  .drop .t1{font-weight:600}
+  .drop .t2{color:var(--muted);font-size:12px;margin-top:4px}
+  .drop input[type=file]{display:none}
+
+  .pill-btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    width:100%;padding:13px 16px;background:var(--accent);color:#fff;border:0;border-radius:4px;
+    font-weight:600;letter-spacing:.06em;font-size:13px;margin-top:16px;
+    transition:background .15s,transform .05s;
+  }
+  .pill-btn:hover{background:#222}
+  .pill-btn:active{transform:translateY(1px)}
+  .pill-btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line-strong)}
+  .pill-btn.ghost:hover{background:var(--bg-soft)}
+  .pill-btn:disabled{opacity:.5;cursor:not-allowed}
+
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .chip-tag{font-size:11px;background:#fff7d9;border:1px solid #e7d28b;color:#7a5a00;padding:4px 10px;border-radius:14px;font-weight:600}
+  .chip-tag.green{background:#e8f7ee;border-color:#b6e0c5;color:#1f7a4c}
+  .chip-tag.blue{background:#e8f1fb;border-color:#b9d2ef;color:#1f4a83}
+
+  .col .req-title{font-size:11px;letter-spacing:.18em;color:var(--muted);font-weight:700;margin-top:22px;margin-bottom:8px}
+  .req-cols{display:flex;flex-wrap:wrap;gap:6px}
+  .req-cols span{font-size:11px;background:var(--chip);border:1px solid var(--line);padding:3px 9px;border-radius:3px;color:var(--ink-soft);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px}
+
+  .note{font-size:12px;color:var(--ink-soft);margin-top:10px}
+  .note b{color:var(--ink)}
+  .note .dot{color:var(--brand);margin-right:6px}
+
+  /* ===== Filters panel ===== */
+  .filters{
+    padding:24px 36px;background:#fafaf8;border-bottom:1px solid var(--line);
+    display:grid;grid-template-columns:repeat(6,1fr);gap:16px;align-items:end;
+  }
+  .filters.hidden{display:none}
+  .field label{display:block;font-size:11px;letter-spacing:.14em;color:var(--muted);font-weight:700;margin-bottom:5px;text-transform:uppercase}
+  .field select, .field input{
+    width:100%;padding:8px 10px;border:1px solid var(--line-strong);border-radius:3px;background:#fff;font-size:13px;color:var(--ink);
+  }
+
+  /* ===== Required columns table ===== */
+  .req-table{margin-top:14px;border:1px solid var(--line);border-radius:4px;overflow:hidden;font-size:12px;background:#fff}
+  .req-table table{border-collapse:collapse;width:100%}
+  .req-table th{background:#f1ede4;color:var(--ink);font-weight:700;padding:8px 10px;text-align:left;border-bottom:1px solid var(--line);font-size:10.5px;letter-spacing:.12em}
+  .req-table td{padding:7px 10px;border-bottom:1px solid #f0efe9;color:var(--ink-soft)}
+  .req-table tr:last-child td{border-bottom:0}
+
+  /* ===== Analysis grid (Step 3) ===== */
+  .view-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:12px;
+  }
+  .view-card{
+    background:#fff;border:1px solid var(--line);border-radius:4px;padding:14px 14px 12px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:border-color .15s,transform .05s;
+  }
+  .view-card:hover{border-color:var(--brand)}
+  .view-card.active{border-color:var(--brand);box-shadow:0 0 0 2px rgba(200,16,46,.08)}
+  .view-card .vc-icon{
+    width:34px;height:34px;background:var(--bg-soft);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;color:var(--brand);
+  }
+  .view-card .vc-text{flex:1}
+  .view-card .vc-name{font-weight:700;font-size:13px;letter-spacing:.02em}
+  .view-card .vc-desc{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.35}
+
+  /* ===== Footer banner ===== */
+  .footer{
+    display:flex;justify-content:space-between;align-items:center;background:#0c0d10;color:#fff;padding:14px 28px;font-size:12px;letter-spacing:.16em;
+  }
+  .footer .stats{display:flex;gap:34px}
+  .footer .stats .stat{display:flex;flex-direction:column;align-items:flex-end;line-height:1.05}
+  .footer .stats .stat b{font-size:18px;color:#fff;letter-spacing:.01em;font-weight:800}
+  .footer .stats .stat .l{font-size:9.5px;color:#9b9b9b;margin-top:2px}
+  .footer .stats .stat.brand b{color:var(--brand)}
+  .footer .stats .stat.brand .l{color:var(--brand)}
+  .footer .left{color:#bbb;font-weight:700;letter-spacing:.22em;font-size:11px}
+
+  /* ===== Output / dashboard area ===== */
+  .dashboard{display:none;padding:30px 36px;background:#fff}
+  .dashboard.open{display:block}
+  .db-header{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:24px}
+  .db-header h2{font-size:30px}
+  .db-header .sub{color:var(--muted);font-size:12px;letter-spacing:.18em;font-weight:600;text-transform:uppercase}
+  .db-actions{display:flex;gap:8px;align-items:center}
+  .db-actions button{padding:8px 14px;border:1px solid var(--line-strong);background:#fff;border-radius:3px;font-size:12px;font-weight:600;letter-spacing:.04em}
+  .db-actions button.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+
+  /* KPI tiles */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:4px;padding:16px 16px 14px;position:relative;overflow:hidden}
+  .kpi .l{font-size:10.5px;letter-spacing:.18em;color:var(--muted);font-weight:700;text-transform:uppercase}
+  .kpi .v{font-family:'Playfair Display',Georgia,serif;font-size:32px;font-weight:700;margin-top:6px;color:var(--ink);line-height:1.05}
+  .kpi .d{font-size:12px;margin-top:6px;font-weight:600}
+  .kpi .d.up{color:var(--good)}
+  .kpi .d.down{color:var(--bad)}
+  .kpi .accent{position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--brand)}
+
+  /* Section cards */
+  .section{margin-bottom:36px}
+  .section h3{font-size:20px;margin-bottom:6px}
+  .section .sub-h{font-size:12px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:14px}
+
+  .grid-2{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .grid-eq{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:4px;padding:18px}
+  .card h4{font-family:'Inter',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);font-weight:700;margin-bottom:10px}
+  .card .micro{font-size:11px;color:var(--muted);margin-top:8px}
+  .chart-wrap{position:relative;height:260px}
+  .chart-wrap.tall{height:340px}
+
+  /* Insights blocks */
+  .insight{
+    background:#fbf8f1;border-left:3px solid var(--brand);padding:12px 16px;border-radius:0 3px 3px 0;margin:8px 0;
+    font-size:13px;color:var(--ink-soft);
+  }
+  .insight b{color:var(--ink)}
+  .insight.good{background:#eff8f1;border-color:var(--good)}
+  .insight.bad{background:#fdf2f1;border-color:var(--bad)}
+  .insight.warn{background:#fdf6e7;border-color:var(--warn)}
+
+  table.data{width:100%;border-collapse:collapse;font-size:12px}
+  table.data th{background:#fafaf8;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);color:var(--ink);font-weight:700;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  table.data td{padding:8px 10px;border-bottom:1px solid #f3f2ec;color:var(--ink-soft)}
+  table.data tr:last-child td{border-bottom:0}
+  table.data .num{text-align:right;font-variant-numeric:tabular-nums}
+  table.data .tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;letter-spacing:.04em}
+  .tag.green{background:#e8f7ee;color:#1f7a4c}
+  .tag.red{background:#fbecea;color:#b3261e}
+  .tag.amber{background:#fdf3d9;color:#7a5a00}
+  .tag.blue{background:#e9f0fa;color:#1f4a83}
+  .tag.grey{background:#eee;color:#555}
+
+  /* Nav tabs for module views */
+  .module-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:8px}
+  .module-nav button{
+    padding:8px 14px;background:none;border:0;border-radius:3px;font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--muted);cursor:pointer;
+  }
+  .module-nav button.active{color:var(--brand);background:#fbf2f3}
+  .module-nav button:hover{color:var(--ink)}
+
+  /* Hidden module panes */
+  .module-pane{display:none}
+  .module-pane.active{display:block}
+
+  /* Modal */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100;padding:24px}
+  .modal-bg.open{display:flex}
+  .modal{background:#fff;border-radius:6px;max-width:980px;width:100%;max-height:88vh;overflow:auto;padding:24px}
+  .modal h3{margin-bottom:10px}
+  .modal-close{float:right;background:none;border:0;font-size:22px;cursor:pointer;color:var(--muted)}
+
+  /* Toast */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--ink);color:#fff;padding:12px 18px;border-radius:4px;font-size:13px;z-index:200;box-shadow:0 6px 18px rgba(0,0,0,.18);display:none}
+  .toast.show{display:block;animation:fadein .2s}
+  @keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* Loader */
+  .loader{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:8px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* Pricing input grid */
+  .ad-spend{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+  .ad-spend label{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;font-weight:700;display:block;margin-bottom:4px}
+  .ad-spend input{width:100%;padding:7px 9px;border:1px solid var(--line-strong);border-radius:3px;font-size:13px}
+
+  /* Responsive */
+  @media (max-width:1100px){
+    .workflow{grid-template-columns:1fr}
+    .col{border-right:0;border-bottom:1px solid var(--line)}
+    .kpi-grid{grid-template-columns:repeat(2,1fr)}
+    .grid-2,.grid-3,.grid-eq{grid-template-columns:1fr}
+    .stepper{grid-template-columns:repeat(4,1fr);gap:14px}
+    .stepper::before{display:none}
+    .filters{grid-template-columns:repeat(2,1fr)}
+    .view-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ TOP NAV ============ -->
+<div class="nav">
+  <div class="nav-left">
+    <span class="nav-about" onclick="openAbout()">ABOUT</span>
+    <span class="brand">REVENUE GROWTH OS<span class="dot"></span></span>
+  </div>
+  <div class="nav-right">
+    RGM:IQ <span class="beta">BETA</span>
+  </div>
+</div>
+
+<!-- ============ STEPPER ============ -->
+<div class="stepper" id="stepper">
+  <div class="step active" data-step="1"><div class="icon">⬆</div><div class="label">Raw Export</div><div class="sub">Sales / SAP / POS data</div></div>
+  <div class="step" data-step="2"><div class="icon">⚙</div><div class="label">Format <span class="chip">STEP 1</span></div><div class="sub">Auto-map · backfill</div></div>
+  <div class="step" data-step="3"><div class="icon">📦</div><div class="label">Upload <span class="chip">STEP 2</span></div><div class="sub">Master DB .xlsx</div></div>
+  <div class="step" data-step="4"><div class="icon">🔻</div><div class="label">Filter <span class="chip">STEP 2</span></div><div class="sub">Region · channel · period</div></div>
+  <div class="step" data-step="5"><div class="icon">⚏</div><div class="label">Segments <span class="chip optional">OPTIONAL</span></div><div class="sub">Custom slices</div></div>
+  <div class="step" data-step="6"><div class="icon">⚡</div><div class="label">Generate <span class="chip">STEP 3</span></div><div class="sub">9 AI analysis views</div></div>
+  <div class="step" data-step="7"><div class="icon">⤓</div><div class="label">Export PPTX</div><div class="sub">Board-ready deck</div></div>
+  <div class="hide" onclick="this.parentElement.style.display='none'">HIDE ▲</div>
+</div>
+
+<!-- ============ WORKFLOW ============ -->
+<div class="workflow" id="workflow">
+
+  <!-- ===== STEP 1 ===== -->
+  <div class="col">
+    <div class="step-tag">STEP 1</div>
+    <h2>Format<br/>Your Data</h2>
+    <p class="lead">Convert raw Sales / SAP / POS exports into a clean, analysis-ready Master DB. Columns auto-mapped, dates backfilled, missing values flagged, derived metrics computed.</p>
+
+    <label class="drop" id="dropRaw" for="rawFile">
+      <input type="file" id="rawFile" accept=".xlsx,.xls,.csv" />
+      <div class="glyph">⬆</div>
+      <div class="t1">Upload raw XLS / XLSX / CSV</div>
+      <div class="t2">Click or drag &amp; drop</div>
+    </label>
+
+    <button class="pill-btn" id="btnFormat" disabled>↓ Format &amp; Download Master DB</button>
+
+    <div class="req-title">REQUIRED COLUMNS IN YOUR EXPORT</div>
+    <div class="req-cols">
+      <span>Date</span><span>Product / SKU</span><span>Category</span><span>Region</span>
+      <span>Channel</span><span>Customer ID</span><span>Units Sold</span><span>Base Price</span>
+      <span>Discount</span><span>Revenue</span><span>Inventory Level</span><span>Vendor</span>
+      <span>Warehouse</span><span>Shipping Days</span><span>Expiry Date</span>
+    </div>
+
+    <div class="note"><span class="dot">●</span>Derived: <b>CLV · AOV · Profit% · ROAS · CAC · Inventory pressure · Expiry risk · Churn risk · Vendor dependency</b>.</div>
+
+    <button class="pill-btn ghost" style="margin-top:10px;font-size:12px" onclick="skipToStep2()">
+      ✓ Already have a Master DB? Skip to Step 2 →
+    </button>
+  </div>
+
+  <!-- ===== STEP 2 ===== -->
+  <div class="col">
+    <div class="step-tag">STEP 2</div>
+    <h2>Upload +<br/>Filter</h2>
+    <p class="lead">Drop your Master DB, then set your filters — region, channel, category, vendor, sector and time periods.</p>
+
+    <label class="drop" id="dropMaster" for="masterFile">
+      <input type="file" id="masterFile" accept=".xlsx,.xls,.csv" />
+      <div class="glyph">📊</div>
+      <div class="t1">Drop Master DB here</div>
+      <div class="t2">.xlsx / .xls / .csv — Master DB sheet required</div>
+    </label>
+
+    <div class="note" style="margin-top:14px"><b>📋 File Requirements:</b> Sheet named <code>Master DB</code> · Date format: <code>MM/DD/YYYY</code></div>
+
+    <div class="req-title">REQUIRED COLUMNS</div>
+    <div class="req-table">
+      <table>
+        <thead><tr><th>FIELD</th><th>SAMPLE</th><th>USED FOR</th></tr></thead>
+        <tbody>
+          <tr><td>Product</td><td>Bru Gold 100g</td><td>SKU intel</td></tr>
+          <tr><td>Category</td><td>Tea / Coffee</td><td>Mix analysis</td></tr>
+          <tr><td>Region</td><td>North / South</td><td>Regional split</td></tr>
+          <tr><td>Channel</td><td>Q-Comm / Retail</td><td>Channel ROI</td></tr>
+          <tr><td>Revenue</td><td>12,450</td><td>All views</td></tr>
+          <tr><td>NPS</td><td>8</td><td>Churn / loyalty</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note" style="margin-top:14px"><span class="dot">●</span>One row per transaction. <b>Period 1</b> = prior period · <b>Period 2</b> = current.</div>
+  </div>
+
+  <!-- ===== STEP 3 ===== -->
+  <div class="col">
+    <div class="step-tag">STEP 3</div>
+    <h2>Analyze +<br/>Export</h2>
+    <p class="lead">Define custom segments, generate 9 live AI analysis views with drill-through opportunities, then export a board-ready PPTX deck.</p>
+
+    <div class="view-grid">
+      <div class="view-card" data-module="revenue"><div class="vc-icon">📈</div><div class="vc-text"><div class="vc-name">Revenue Analytics</div><div class="vc-desc">YoY growth · region · channel</div></div></div>
+      <div class="view-card" data-module="sku"><div class="vc-icon">🏷</div><div class="vc-text"><div class="vc-name">SKU Intelligence</div><div class="vc-desc">Winners · dead inventory · next bets</div></div></div>
+      <div class="view-card" data-module="marketing"><div class="vc-icon">📣</div><div class="vc-text"><div class="vc-name">Marketing Efficiency</div><div class="vc-desc">ROAS · CAC · budget mix</div></div></div>
+      <div class="view-card" data-module="customer"><div class="vc-icon">👥</div><div class="vc-text"><div class="vc-name">Customer Intel</div><div class="vc-desc">Loyalty · CLV · churn risk</div></div></div>
+      <div class="view-card" data-module="supply"><div class="vc-icon">🚚</div><div class="vc-text"><div class="vc-name">Supply Chain</div><div class="vc-desc">Stockouts · expiry · vendor risk</div></div></div>
+      <div class="view-card" data-module="pricing"><div class="vc-icon">💲</div><div class="vc-text"><div class="vc-name">Pricing &amp; Discount</div><div class="vc-desc">Elasticity · dynamic offers</div></div></div>
+      <div class="view-card" data-module="shelf"><div class="vc-icon">🧱</div><div class="vc-text"><div class="vc-name">Shelf &amp; Packaging</div><div class="vc-desc">Visibility · theme test</div></div></div>
+      <div class="view-card" data-module="competition"><div class="vc-icon">⚔</div><div class="vc-text"><div class="vc-name">Competition</div><div class="vc-desc">Pricing · gaps · trends</div></div></div>
+      <div class="view-card" data-module="expansion"><div class="vc-icon">🌐</div><div class="vc-text"><div class="vc-name">Market Expansion</div><div class="vc-desc">Whitespace · cross-sell · Tier 2/3</div></div></div>
+    </div>
+
+    <button class="pill-btn" id="btnGenerate" disabled style="margin-top:18px">
+      ⚡ Generate &amp; Preview
+    </button>
+    <div class="note" style="margin-top:10px;font-size:11px"><b>AOV</b> &times; <b>Purchase Frequency</b> &times; <b>Customer Count</b>.</div>
+    <button class="pill-btn ghost" id="btnExport" disabled>⤓ Export PPTX Deck</button>
+    <div class="note" style="font-size:11px;color:var(--muted)">Run ⚡ <b>Generate &amp; Preview</b> first to enable export.</div>
+  </div>
+</div>
+
+<!-- ============ FILTERS ============ -->
+<div class="filters hidden" id="filters">
+  <div class="field"><label>Region</label><select id="fRegion" multiple></select></div>
+  <div class="field"><label>Channel</label><select id="fChannel" multiple></select></div>
+  <div class="field"><label>Category</label><select id="fCategory" multiple></select></div>
+  <div class="field"><label>Vendor</label><select id="fVendor" multiple></select></div>
+  <div class="field"><label>Period</label><select id="fPeriod"><option value="all">All time</option><option value="last30">Last 30 days</option><option value="last90">Last 90 days</option><option value="last365">Last 12 months</option><option value="ytd">YTD</option></select></div>
+  <div class="field"><label>&nbsp;</label><button class="pill-btn" style="margin-top:0" onclick="applyFilters()">Apply Filters</button></div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div class="dashboard" id="dashboard">
+
+  <div class="db-header">
+    <div>
+      <div class="sub">AI-POWERED REVENUE INTELLIGENCE · LIVE PREVIEW</div>
+      <h2 id="dbTitle">Revenue Growth Operating System</h2>
+    </div>
+    <div class="db-actions">
+      <button onclick="downloadCleanXlsx()">⤓ Clean Master DB (.xlsx)</button>
+      <button onclick="downloadInsightsJson()">⤓ Insights (.json)</button>
+      <button class="primary" onclick="exportPPTX()">⚡ Export PPTX Deck</button>
+    </div>
+  </div>
+
+  <!-- KPI tiles -->
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <!-- Module nav -->
+  <div class="module-nav" id="modNav">
+    <button class="active" data-tab="revenue">Revenue Analytics</button>
+    <button data-tab="sku">SKU Intel</button>
+    <button data-tab="marketing">Marketing</button>
+    <button data-tab="customer">Customer</button>
+    <button data-tab="supply">Supply Chain</button>
+    <button data-tab="pricing">Pricing</button>
+    <button data-tab="shelf">Shelf &amp; Packaging</button>
+    <button data-tab="competition">Competition</button>
+    <button data-tab="expansion">Expansion</button>
+  </div>
+
+  <!-- Module panes -->
+  <div class="module-pane active" id="pane-revenue"></div>
+  <div class="module-pane" id="pane-sku"></div>
+  <div class="module-pane" id="pane-marketing"></div>
+  <div class="module-pane" id="pane-customer"></div>
+  <div class="module-pane" id="pane-supply"></div>
+  <div class="module-pane" id="pane-pricing"></div>
+  <div class="module-pane" id="pane-shelf"></div>
+  <div class="module-pane" id="pane-competition"></div>
+  <div class="module-pane" id="pane-expansion"></div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<div class="footer">
+  <div class="left">REVENUE GROWTH OPERATING SYSTEM</div>
+  <div class="stats">
+    <div class="stat"><b>9</b><span class="l">ANALYSIS VIEWS</span></div>
+    <div class="stat"><b>5</b><span class="l">FILTER DIMENSIONS</span></div>
+    <div class="stat"><b>100%</b><span class="l">EXCEL-VERIFIED</span></div>
+    <div class="stat brand"><b>1-click</b><span class="l">PPTX EXPORT</span></div>
+  </div>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div class="modal-bg" id="modal" onclick="if(event.target===this) closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===================================================================== */
+/* ============== REVENUE GROWTH OPERATING SYSTEM · CORE ============== */
+/* ===================================================================== */
+// Single-file dashboard. All logic runs client-side.
+// Modeled on the Bain Pipeline Deconstruction Tool. Spec: docx in OneDrive.
+
+const STATE = {
+  raw: null,             // raw rows as parsed
+  clean: null,           // cleaned rows with derived metrics
+  filtered: null,        // post-filter rows
+  filters: { region:[], channel:[], category:[], vendor:[], period:'all' },
+  adSpend: { 'Meta Ads':0, 'Google Ads':0, 'Influencer':0, 'Other':0 },
+  charts: {},
+  ready: false,
+};
+
+/* ----------- Column alias map (Cortex / SAP / Salesforce aliases) ----------- */
+const COLMAP = {
+  date:       ['date','date sold','order date','txn date','transaction date','invoice date','sale date','billing date'],
+  product:    ['product','product name','sku','sku id','item','item name','product/sku','product id','material'],
+  category:   ['category','sub category','sub-category','product category','segment'],
+  region:     ['region','zone','geo','area','territory'],
+  channel:    ['channel','sales channel','channel type','distribution','dist channel'],
+  customer:   ['customer','customer id','cust id','client','client id','account'],
+  units:      ['units','units sold','quantity','qty','volume','units shipped'],
+  baseprice:  ['base price','mrp','list price','price','unit price','msrp'],
+  discount:   ['discount','disc','discount %','disc%','offer'],
+  revenue:    ['revenue','net sales','sales','net revenue','amount','total','grand total','net amount'],
+  cost:       ['cost','cogs','cost price','unit cost'],
+  marketing:  ['marketing channel','marketing source','campaign source','source','utm source','utm_source'],
+  nps:        ['nps','nps score','net promoter','csat'],
+  inventory:  ['inventory','inventory level','stock','stock level','on hand'],
+  vendor:     ['vendor','supplier','vendor name','supplier name'],
+  warehouse:  ['warehouse','wh','dc','distribution center','depot'],
+  shipdays:   ['shipping days','ship days','delivery days','ship time','lead time','transit'],
+  shipcost:   ['shipping cost','freight','ship cost','logistics cost'],
+  stockout:   ['stockout','stockouts','oos','out of stock'],
+  expiry:     ['expiry','expiry date','best before','best by','exp date'],
+  returned:   ['returned','return','return flag','is returned'],
+  deliverytime:['delivery time','delivered in','time to deliver'],
+};
+
+/* ===== Utility ===== */
+const fmt = (n) => {
+  if(n===null||n===undefined||isNaN(n)) return '—';
+  const abs = Math.abs(n);
+  if(abs>=1e9) return (n/1e9).toFixed(2)+'B';
+  if(abs>=1e6) return (n/1e6).toFixed(2)+'M';
+  if(abs>=1e3) return (n/1e3).toFixed(1)+'K';
+  return n.toFixed(0);
+};
+const fmtMoney = (n)=>'₹'+fmt(n);
+const fmtPct = (n)=>(n===null||isNaN(n))?'—':(n>=0?'+':'')+n.toFixed(1)+'%';
+const safe = (x,d=0)=>x===null||x===undefined||isNaN(x)?d:x;
+const groupBy = (arr,fn)=>arr.reduce((a,x)=>{const k=fn(x);(a[k]=a[k]||[]).push(x);return a;},{});
+const sumBy = (arr,fn)=>arr.reduce((s,x)=>s+(+fn(x)||0),0);
+const uniq = (arr)=>[...new Set(arr)];
+const pctile = (arr,p)=>{ if(!arr.length) return 0; const s=[...arr].sort((a,b)=>a-b); return s[Math.floor((s.length-1)*p)]; };
+const toast = (msg,ms=2400)=>{const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(window._tid);window._tid=setTimeout(()=>t.classList.remove('show'),ms);};
+
+function normalizeHeader(h){ return String(h||'').toLowerCase().replace(/[_\-./]/g,' ').replace(/\s+/g,' ').trim(); }
+function detectColumn(headers, aliases){
+  const lc = headers.map(normalizeHeader);
+  for(const a of aliases){
+    const idx = lc.indexOf(a);
+    if(idx>=0) return headers[idx];
+  }
+  for(const a of aliases){
+    const idx = lc.findIndex(h=>h.includes(a));
+    if(idx>=0) return headers[idx];
+  }
+  return null;
+}
+function buildMapping(headers){
+  const map = {};
+  const claimed = new Set();
+  const lc = headers.map(normalizeHeader);
+
+  // PASS 1: exact matches first — claim headers so no substring match steals them later
+  for(const key of Object.keys(COLMAP)){
+    for(const a of COLMAP[key]){
+      const idx = lc.findIndex((h,i)=>!claimed.has(i) && h===a);
+      if(idx>=0){ map[key] = headers[idx]; claimed.add(idx); break; }
+    }
+  }
+  // PASS 2: substring fallback for unclaimed keys / headers
+  for(const key of Object.keys(COLMAP)){
+    if(map[key]) continue;
+    for(const a of COLMAP[key]){
+      const idx = lc.findIndex((h,i)=>!claimed.has(i) && h.includes(a));
+      if(idx>=0){ map[key] = headers[idx]; claimed.add(idx); break; }
+    }
+  }
+  return map;
+}
+function parseDate(v){
+  if(!v) return null;
+  if(v instanceof Date) return v;
+  if(typeof v === 'number'){
+    // Excel serial date
+    const d = XLSX.SSF.parse_date_code(v);
+    if(d) return new Date(Date.UTC(d.y,(d.m||1)-1,d.d||1));
+  }
+  const d = new Date(v);
+  return isNaN(d.getTime()) ? null : d;
+}
+function parseNum(v){
+  if(v===null||v===undefined||v==='') return null;
+  if(typeof v === 'number') return v;
+  const s = String(v).replace(/[₹$,\s]/g,'').replace(/%$/,'');
+  const n = parseFloat(s);
+  return isNaN(n)?null:n;
+}
+
+/* ===================================================================== */
+/* ===== STEP 1 — INGEST + CLEAN + DERIVE ============================== */
+/* ===================================================================== */
+async function handleRawUpload(file){
+  toast('Reading '+file.name+'…');
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf,{cellDates:true});
+  const sheetName = wb.SheetNames.find(s=>/master\s*db/i.test(s)) || wb.SheetNames[0];
+  const json = XLSX.utils.sheet_to_json(wb.Sheets[sheetName],{defval:null});
+  STATE.raw = json;
+  document.getElementById('btnFormat').disabled = false;
+  toast(`Loaded ${json.length.toLocaleString()} rows from "${sheetName}"`);
+  // Auto-advance stepper
+  setStep(2);
+}
+async function handleMasterUpload(file){
+  toast('Reading Master DB '+file.name+'…');
+  const buf = await file.arrayBuffer();
+  const wb = XLSX.read(buf,{cellDates:true});
+  const sheetName = wb.SheetNames.find(s=>/master\s*db/i.test(s)) || wb.SheetNames[0];
+  const json = XLSX.utils.sheet_to_json(wb.Sheets[sheetName],{defval:null});
+  // If this looks already cleaned (has Profit% / CLV columns), use as-is; else clean.
+  const headers = Object.keys(json[0] || {});
+  if(headers.some(h=>/profit\s*%|clv|churn\s*risk/i.test(h))){
+    STATE.clean = json.map(normalizeRow);
+  } else {
+    STATE.raw = json;
+    cleanAndDerive();
+  }
+  buildFilters();
+  document.getElementById('btnGenerate').disabled = false;
+  setStep(3);
+  setStep(4);
+  toast(`Master DB ready · ${STATE.clean.length.toLocaleString()} rows`);
+}
+function normalizeRow(r){
+  // pass-through; coerce numerics
+  const o = {...r};
+  ['Units','Base Price','Discount','Revenue','Cost','Profit','Profit %','CLV','AOV','NPS','Inventory','Ship Days','Ship Cost'].forEach(k=>{
+    if(o[k]!==undefined) o[k] = parseNum(o[k]);
+  });
+  if(o.Date) o.Date = parseDate(o.Date);
+  if(o.Expiry) o.Expiry = parseDate(o.Expiry);
+  return o;
+}
+
+function cleanAndDerive(){
+  if(!STATE.raw || !STATE.raw.length){ toast('No raw data'); return; }
+  const headers = Object.keys(STATE.raw[0]);
+  const M = buildMapping(headers);
+
+  // First pass: extract canonical fields
+  let rows = STATE.raw.map((r,i)=>{
+    const o = { _ix:i };
+    o.Date     = parseDate(r[M.date]);
+    o.Product  = r[M.product] || '—';
+    o.Category = r[M.category] || categorize(o.Product);
+    o.Region   = (r[M.region] || '—').toString().trim();
+    o.Channel  = (r[M.channel] || '—').toString().trim();
+    o['Channel Type'] = inferChannelType(o.Channel);
+    o.Customer = (r[M.customer] || '').toString().trim() || 'CUST-'+i;
+    o.Units    = parseNum(r[M.units]) || 0;
+    o['Base Price'] = parseNum(r[M.baseprice]);
+    o.Discount = parseNum(r[M.discount]) || 0;
+    o.Revenue  = parseNum(r[M.revenue]);
+    o.Cost     = parseNum(r[M.cost]);
+    o['Marketing Channel'] = r[M.marketing] || '—';
+    o.NPS      = parseNum(r[M.nps]);
+    o.Inventory= parseNum(r[M.inventory]);
+    o.Vendor   = (r[M.vendor] || '—').toString().trim();
+    o.Warehouse= (r[M.warehouse] || '—').toString().trim();
+    o['Ship Days'] = parseNum(r[M.shipdays]);
+    o['Ship Cost'] = parseNum(r[M.shipcost]);
+    o.Stockout = !!parseNum(r[M.stockout]);
+    o.Expiry   = parseDate(r[M.expiry]);
+    o.Returned = !!parseNum(r[M.returned]);
+    return o;
+  });
+
+  // Category-aware TOTAL cost ratio (COGS + marketing + distribution + SG&A) of MRP.
+  // Calibrated so NET margin (after avg ~15% discount) lands in CPG-realistic bands:
+  //   premium personal care 15-20%, coffee/tea 12-18%, snacks 8-12%, beverages 6-10%.
+  // Reference: HUL ~14%, Nestlé India ~16%, Britannia ~12%, Dabur ~15%, Marico ~14%, Coca-Cola India ~10%.
+  const COST_RATIO = {
+    'Beverages':        0.82,  // ~18% gross @ full price → ~3-8% net after avg discount
+    'Healthy Snacks':   0.78,  // ~22% gross → ~7-12% net
+    'Ice Cream':        0.80,  // ~20% gross → ~5-10% net
+    'Tea / Coffee':     0.74,  // ~26% gross → ~12-18% net
+    'Skin / Hair Care': 0.68,  // ~32% gross → ~18-22% net
+    'Deodorants':       0.72,  // ~28% gross → ~14-18% net
+    'Other':            0.76,
+  };
+  // Backfill Revenue + Cost
+  rows.forEach(r=>{
+    if(r.Revenue==null && r['Base Price']!=null){
+      r.Revenue = r.Units * r['Base Price'] * (1 - (r.Discount||0)/100);
+    }
+    if(r.Revenue==null) r.Revenue = 0;
+    if(r.Cost==null && r['Base Price']!=null){
+      // Cost is fixed per unit at full MRP — discount eats margin, doesn't lower cost
+      const ratio = COST_RATIO[r.Category] || COST_RATIO['Other'];
+      r.Cost = r.Units * r['Base Price'] * ratio;
+    } else if(r.Cost==null){
+      const ratio = COST_RATIO[r.Category] || COST_RATIO['Other'];
+      r.Cost = r.Revenue * ratio;
+    }
+    r.Profit = r.Revenue - r.Cost;
+    r['Profit %'] = r.Revenue>0 ? (r.Profit/r.Revenue)*100 : 0;  // Net margin, not markup
+  });
+
+  // Customer-level aggregates → CLV / AOV / frequency
+  const byCust = groupBy(rows, r=>r.Customer);
+  const custStats = {};
+  for(const c of Object.keys(byCust)){
+    const rs = byCust[c];
+    const tot = sumBy(rs,r=>r.Revenue);
+    const orders = uniq(rs.map(r=>r.Date?r.Date.toISOString().slice(0,10):'')).length || rs.length;
+    const dates = rs.map(r=>r.Date).filter(Boolean).sort((a,b)=>a-b);
+    const span = dates.length>1 ? (dates[dates.length-1]-dates[0])/(1000*60*60*24) : 0;
+    const npsValues = rs.map(r=>r.NPS).filter(v=>v!=null);
+    custStats[c] = {
+      CLV: tot,
+      Orders: orders,
+      AOV: tot/Math.max(orders,1),
+      Frequency: span>0 ? orders/(span/30) : orders, // orders / month
+      NPS: npsValues.length ? npsValues.reduce((a,b)=>a+b,0)/npsValues.length : null,
+      LastDate: dates.length ? dates[dates.length-1] : null,
+      FirstDate: dates.length ? dates[0] : null,
+    };
+  }
+  rows.forEach(r=>{
+    const s = custStats[r.Customer] || {};
+    r.CLV = s.CLV; r.AOV = s.AOV; r['Purchase Frequency'] = s.Frequency;
+    // NPS-based sentiment
+    if(r.NPS!=null){
+      r['Customer Sentiment'] = r.NPS>=9?'Promoter':r.NPS>=7?'Passive':r.NPS>=0?'Detractor':'—';
+    } else r['Customer Sentiment'] = '—';
+  });
+
+  // Vendor dependency
+  const totalRev = sumBy(rows, r=>r.Revenue);
+  const byVendor = groupBy(rows, r=>r.Vendor);
+  const vendorCount = Object.keys(byVendor).length || 1;
+  const equalShare = 100/vendorCount;
+  const vendorPct = {};
+  for(const v of Object.keys(byVendor)){
+    vendorPct[v] = (sumBy(byVendor[v], r=>r.Revenue)/Math.max(totalRev,1))*100;
+  }
+  rows.forEach(r=>{
+    const p = vendorPct[r.Vendor]||0;
+    r['Vendor Dependency'] = p>equalShare ? 'High' : (p>10 ? 'Medium' : 'Low');
+    r['Vendor Share %'] = p;
+  });
+
+  // Warehouse efficiency
+  rows.forEach(r=>{
+    const d = r['Ship Days'];
+    r['Warehouse Efficiency'] = d==null?'—':(d<=3?'High':d<=5?'Medium':'Low');
+  });
+
+  // Inventory pressure + Expiry risk
+  const today = new Date();
+  rows.forEach(r=>{
+    if(r.Expiry){
+      const days = (r.Expiry - today)/(1000*60*60*24);
+      if(days<30) r['Expiry Risk'] = 'High';
+      else if(days<90) r['Expiry Risk'] = 'High';
+      else if(days<180) r['Expiry Risk'] = 'Medium';
+      else r['Expiry Risk'] = 'Low';
+    } else r['Expiry Risk'] = '—';
+    // Inventory pressure: high inventory + close expiry = high pressure
+    if(r.Inventory!=null){
+      if(r['Expiry Risk']==='High' && r.Inventory>0) r['Inventory Pressure'] = 'High';
+      else if(r['Expiry Risk']==='Medium') r['Inventory Pressure'] = 'Medium';
+      else r['Inventory Pressure'] = 'Low';
+    } else r['Inventory Pressure'] = '—';
+  });
+
+  // Churn risk
+  rows.forEach(r=>{
+    const lowNps = r.NPS!=null && r.NPS<7;
+    const slow   = r['Purchase Frequency']!=null && r['Purchase Frequency']<0.5;
+    const longShip = r['Ship Days']!=null && r['Ship Days']>5;
+    const hits = [lowNps,slow,longShip].filter(Boolean).length + (r.Returned?1:0);
+    r['Churn Risk'] = hits>=2?'High':hits===1?'Medium':'Low';
+  });
+
+  // Packaging theme (synthetic if missing) — distribute deterministic by Product
+  const themes = ['Normal','Special Theme','Colourful'];
+  rows.forEach(r=>{
+    if(!r.Packaging){
+      r.Packaging = themes[hashStr(String(r.Product))%themes.length];
+    }
+  });
+
+  // SKU profit-rank percentiles
+  const profitPctByProduct = {};
+  const skuProfits = Object.entries(groupBy(rows,r=>r.Product)).map(([p,rs])=>{
+    const pr = avg(rs.map(r=>r['Profit %']).filter(v=>!isNaN(v)));
+    profitPctByProduct[p] = pr;
+    return pr;
+  });
+  const p30 = pctile(skuProfits, .3);
+  const p70 = pctile(skuProfits, .7);
+  rows.forEach(r=>{
+    const pp = profitPctByProduct[r.Product];
+    r['SKU Tier'] = pp>=p70?'High Margin':pp<=p30?'Low Performer':'Mid';
+  });
+
+  // Dead inventory: SKU last sold > 90 days ago AND has inventory
+  const today2 = new Date();
+  const skuLast = {};
+  rows.forEach(r=>{
+    if(r.Date && (!skuLast[r.Product] || r.Date>skuLast[r.Product])) skuLast[r.Product]=r.Date;
+  });
+  rows.forEach(r=>{
+    const last = skuLast[r.Product];
+    const days = last ? (today2-last)/(1000*60*60*24) : 999;
+    r['Dead Inventory'] = (days>90 && (r.Inventory||0)>0) ? 'Yes' : 'No';
+    r['Days Since Last Sale'] = Math.round(days);
+  });
+
+  STATE.clean = rows;
+  return rows;
+}
+function hashStr(s){let h=0;for(let i=0;i<s.length;i++) h=(h*31 + s.charCodeAt(i))|0;return Math.abs(h);}
+function avg(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:0;}
+function inferChannelType(c){
+  const s = (c||'').toLowerCase();
+  if(/website|direct|event|catalog|sales team|d2c/.test(s)) return 'Direct';
+  if(/quick|q-comm|qcomm|ecom|retail|distributor|trade|store|amazon|flipkart|blinkit|zepto/.test(s)) return 'Indirect';
+  return 'Other';
+}
+function categorize(p){
+  const s = (p||'').toLowerCase();
+  if(/coffee|tea|chai|latte/.test(s)) return 'Tea / Coffee';
+  if(/snack|chips|biscuit|cookie|granola/.test(s)) return 'Healthy Snacks';
+  if(/ice\s*cream|frozen|kulfi/.test(s)) return 'Ice Cream';
+  if(/cream|moistur|shampoo|conditioner|serum/.test(s)) return 'Skin / Hair Care';
+  if(/deodor|perfume|spray/.test(s)) return 'Deodorants';
+  if(/juice|cola|soda|water|drink|beverage/.test(s)) return 'Beverages';
+  return 'Other';
+}
+
+/* ===================================================================== */
+/* ===== STEP 2 — FILTERS ============================================== */
+/* ===================================================================== */
+function buildFilters(){
+  if(!STATE.clean) return;
+  const setOpts = (sel, vals) => {
+    sel.innerHTML = '';
+    uniq(vals).filter(v=>v && v!=='—').sort().forEach(v=>{
+      const o = document.createElement('option'); o.value=v; o.textContent=v; sel.appendChild(o);
+    });
+  };
+  setOpts(document.getElementById('fRegion'),   STATE.clean.map(r=>r.Region));
+  setOpts(document.getElementById('fChannel'),  STATE.clean.map(r=>r.Channel));
+  setOpts(document.getElementById('fCategory'), STATE.clean.map(r=>r.Category));
+  setOpts(document.getElementById('fVendor'),   STATE.clean.map(r=>r.Vendor));
+  document.getElementById('filters').classList.remove('hidden');
+}
+function readMulti(sel){ return [...sel.options].filter(o=>o.selected).map(o=>o.value); }
+function applyFilters(){
+  if(!STATE.clean) return;
+  const f = {
+    region: readMulti(document.getElementById('fRegion')),
+    channel: readMulti(document.getElementById('fChannel')),
+    category: readMulti(document.getElementById('fCategory')),
+    vendor: readMulti(document.getElementById('fVendor')),
+    period: document.getElementById('fPeriod').value,
+  };
+  STATE.filters = f;
+  let rs = STATE.clean.slice();
+  if(f.region.length)   rs = rs.filter(r=>f.region.includes(r.Region));
+  if(f.channel.length)  rs = rs.filter(r=>f.channel.includes(r.Channel));
+  if(f.category.length) rs = rs.filter(r=>f.category.includes(r.Category));
+  if(f.vendor.length)   rs = rs.filter(r=>f.vendor.includes(r.Vendor));
+  if(f.period!=='all'){
+    const now = new Date();
+    const cutoff = new Date(now);
+    if(f.period==='last30') cutoff.setDate(now.getDate()-30);
+    if(f.period==='last90') cutoff.setDate(now.getDate()-90);
+    if(f.period==='last365') cutoff.setDate(now.getDate()-365);
+    if(f.period==='ytd') cutoff.setMonth(0,1);
+    rs = rs.filter(r=>r.Date && r.Date>=cutoff);
+  }
+  STATE.filtered = rs;
+  if(STATE.ready) generateDashboard();
+  toast(`Filters applied · ${rs.length.toLocaleString()} rows`);
+}
+
+/* ===================================================================== */
+/* ===== STEP 3 — DASHBOARD ============================================ */
+/* ===================================================================== */
+function generateDashboard(){
+  if(!STATE.clean) { toast('Upload Master DB first'); return; }
+  if(!STATE.filtered) STATE.filtered = STATE.clean.slice();
+  destroyCharts();
+  renderKPIs();
+  renderRevenue();
+  renderSKU();
+  renderMarketing();
+  renderCustomer();
+  renderSupply();
+  renderPricing();
+  renderShelf();
+  renderCompetition();
+  renderExpansion();
+  STATE.ready = true;
+  document.getElementById('btnExport').disabled = false;
+  document.getElementById('dashboard').classList.add('open');
+  setStep(6);
+  document.getElementById('dashboard').scrollIntoView({behavior:'smooth'});
+}
+function destroyCharts(){
+  Object.values(STATE.charts).forEach(c=>{try{c.destroy()}catch(e){}});
+  STATE.charts = {};
+}
+function chart(id,cfg){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(STATE.charts[id]) STATE.charts[id].destroy();
+  STATE.charts[id] = new Chart(el, cfg);
+}
+
+/* ===== Periods (Period 1 = prior; Period 2 = current) ===== */
+function periodSplit(rows){
+  if(!rows.length) return {p1:[],p2:[]};
+  const sorted = rows.filter(r=>r.Date).sort((a,b)=>a.Date-b.Date);
+  if(!sorted.length) return {p1:[],p2:rows};
+  const span = sorted[sorted.length-1].Date - sorted[0].Date;
+  const mid = new Date(sorted[0].Date.getTime() + span/2);
+  return {
+    p1: sorted.filter(r=>r.Date<mid),
+    p2: sorted.filter(r=>r.Date>=mid),
+  };
+}
+
+/* ===== KPIs ===== */
+function renderKPIs(){
+  const rs = STATE.filtered;
+  const totalRev = sumBy(rs,r=>r.Revenue);
+  const totalProfit = sumBy(rs,r=>r.Profit);
+  const profitMargin = totalRev>0 ? (totalProfit/totalRev)*100 : 0;
+  const units = sumBy(rs,r=>r.Units);
+  const {p1,p2} = periodSplit(rs);
+  const r1=sumBy(p1,r=>r.Revenue), r2=sumBy(p2,r=>r.Revenue);
+  const growth = r1>0 ? ((r2-r1)/r1)*100 : 0;
+  const promoters = rs.filter(r=>r['Customer Sentiment']==='Promoter').length;
+  const detractors = rs.filter(r=>r['Customer Sentiment']==='Detractor').length;
+  const validNps = rs.filter(r=>r['Customer Sentiment']!=='—').length;
+  const nps = validNps>0 ? ((promoters - detractors)/validNps)*100 : null;
+  const churnHigh = uniq(rs.filter(r=>r['Churn Risk']==='High').map(r=>r.Customer)).length;
+  const totalCust = uniq(rs.map(r=>r.Customer)).length;
+
+  const tiles = [
+    {l:'TOTAL REVENUE', v:fmtMoney(totalRev), d:fmtPct(growth)+' vs prior period', good:growth>=0},
+    {l:'PROFIT MARGIN', v:profitMargin.toFixed(1)+'%', d:`Profit ${fmtMoney(totalProfit)}`, good:profitMargin>=20},
+    {l:'UNITS SOLD', v:fmt(units), d:`${uniq(rs.map(r=>r.Product)).length} active SKUs`, good:true},
+    {l:'NPS', v: nps==null?'—':nps.toFixed(0), d:`${promoters} promoters · ${detractors} detractors`, good:(nps||0)>=30},
+    {l:'ACTIVE CUSTOMERS', v:fmt(totalCust), d:`${churnHigh} flagged High Churn Risk`, good:churnHigh<totalCust*0.1},
+    {l:'AVG ORDER VALUE', v:fmtMoney(totalRev/Math.max(rs.length,1)), d:'Per transaction', good:true},
+    {l:'FILL RATE', v:(((rs.length - rs.filter(r=>r.Stockout||r.Returned).length)/Math.max(rs.length,1))*100).toFixed(1)+'%', d:'Shipped without stockout or return', good:true},
+    {l:'INV. AT RISK', v:fmt(sumBy(rs.filter(r=>r['Expiry Risk']==='High'), r=>(r.Inventory||0))), d:'High expiry-risk units', good:false},
+  ];
+  document.getElementById('kpiGrid').innerHTML = tiles.map(t=>`
+    <div class="kpi"><div class="accent"></div>
+      <div class="l">${t.l}</div>
+      <div class="v">${t.v}</div>
+      <div class="d ${t.good?'up':'down'}">${t.d}</div>
+    </div>`).join('');
+}
+
+/* ===================================================================== */
+/* ===== MODULE 1 — REVENUE ============================================ */
+/* ===================================================================== */
+function renderRevenue(){
+  const rs = STATE.filtered;
+  const pane = document.getElementById('pane-revenue');
+  if(!STATE.revMetric) STATE.revMetric = 'Revenue';
+  const M = STATE.revMetric;
+  const {p1,p2} = periodSplit(rs);
+
+  // ===== Monthly aggregation (all four metrics) =====
+  const monthly = {};
+  rs.forEach(r=>{
+    if(!r.Date) return;
+    const k = r.Date.getFullYear()+'-'+String(r.Date.getMonth()+1).padStart(2,'0');
+    if(!monthly[k]) monthly[k]={rev:0,prof:0,units:0};
+    monthly[k].rev   += r.Revenue;
+    monthly[k].prof  += r.Profit;
+    monthly[k].units += r.Units;
+  });
+  const months = Object.keys(monthly).sort();
+
+  // ===== Per-group aggregation with Profit Margin %, Growth %, Units =====
+  const aggGrowth = (groupKey)=>{
+    const a1 = aggByGroup(p1, groupKey, ['Revenue','Profit','Units']);
+    const a2 = aggByGroup(p2, groupKey, ['Revenue','Profit','Units']);
+    const mp = {};
+    a1.forEach(r=>{mp[r.key]={p1Rev:r.Revenue,p1Prof:r.Profit,p1Units:r.Units,p2Rev:0,p2Prof:0,p2Units:0}});
+    a2.forEach(r=>{mp[r.key]=mp[r.key]||{p1Rev:0,p1Prof:0,p1Units:0,p2Rev:0,p2Prof:0,p2Units:0}; mp[r.key].p2Rev=r.Revenue; mp[r.key].p2Prof=r.Profit; mp[r.key].p2Units=r.Units});
+    return Object.entries(mp).map(([k,v])=>{
+      const revTot = v.p1Rev+v.p2Rev;
+      const profTot = v.p1Prof+v.p2Prof;
+      const unitTot = v.p1Units+v.p2Units;
+      return {
+        key:k,
+        Revenue:    revTot,
+        Profit:     profTot,
+        Units:      unitTot,
+        'Profit Margin': revTot>0 ? (profTot/revTot)*100 : 0,
+        'Growth %': v.p1Rev>0 ? ((v.p2Rev-v.p1Rev)/v.p1Rev)*100 : (v.p2Rev>0?100:0),
+      };
+    });
+  };
+  const regAgg = aggGrowth('Region').sort((a,b)=>b[M]-a[M]);
+  const chAgg  = aggGrowth('Channel').sort((a,b)=>b[M]-a[M]);
+  const catAgg = aggGrowth('Category').sort((a,b)=>b[M]-a[M]);
+
+  // ===== Metric meta =====
+  const totalRev1 = sumBy(p1,r=>r.Revenue), totalRev2 = sumBy(p2,r=>r.Revenue);
+  const totalProf1= sumBy(p1,r=>r.Profit),  totalProf2= sumBy(p2,r=>r.Profit);
+  const totalUnits1=sumBy(p1,r=>r.Units),   totalUnits2=sumBy(p2,r=>r.Units);
+  const pm1 = totalRev1>0?(totalProf1/totalRev1)*100:0;
+  const pm2 = totalRev2>0?(totalProf2/totalRev2)*100:0;
+  const growthRev = totalRev1>0?((totalRev2-totalRev1)/totalRev1)*100:0;
+
+  const META = {
+    'Revenue':       {monthlySeries: m=>m.rev,                                 label:'Revenue',           fmt: fmtMoney, color:'#c8102e', donut:true,  p1:totalRev1, p2:totalRev2 },
+    'Profit Margin': {monthlySeries: m=>m.rev>0?(m.prof/m.rev)*100:0,          label:'Profit Margin %',   fmt: v=>v.toFixed(1)+'%', color:'#1f7a4c', donut:false, p1:pm1,       p2:pm2       },
+    'Growth %':      {monthlySeries: (m,prev)=>prev&&prev.rev>0?((m.rev-prev.rev)/prev.rev)*100:0, label:'MoM Growth %', fmt: v=>(v>=0?'+':'')+v.toFixed(1)+'%', color:'#1f4a83', donut:false, p1:0, p2:growthRev },
+    'Units Sold':    {monthlySeries: m=>m.units,                                label:'Units Sold',        fmt: fmt,       color:'#b87900', donut:true,  p1:totalUnits1, p2:totalUnits2 },
+  };
+  const meta = META[M];
+
+  // Compute monthly series with prev-month dependence for Growth %
+  const monthlyVals = months.map((m,i)=> meta.monthlySeries(monthly[m], i>0?monthly[months[i-1]]:null));
+
+  // Group-table helper
+  const groupTable = (agg, label) => {
+    const top = agg.slice(0,5);
+    const totalForShare = M==='Revenue'?sumBy(rs,r=>r.Revenue):M==='Units Sold'?sumBy(rs,r=>r.Units):null;
+    return `<table class="data"><thead><tr><th>${label}</th><th class="num">${meta.label}</th>${totalForShare?'<th class="num">% share</th>':''}</tr></thead><tbody>
+      ${top.map(r=>{
+        const val = r[M];
+        const share = totalForShare && totalForShare>0 ? ((val/totalForShare)*100).toFixed(1)+'%' : '';
+        return `<tr><td>${r.key}</td><td class="num">${meta.fmt(val)}</td>${totalForShare?`<td class="num">${share}</td>`:''}</tr>`;
+      }).join('')}
+    </tbody></table>`;
+  };
+
+  const switcher = ['Revenue','Profit Margin','Growth %','Units Sold'].map(m=>`
+    <button class="${m===M?'active':''}" onclick="STATE.revMetric='${m}'; renderRevenue()">${m}</button>
+  `).join('');
+
+  pane.innerHTML = `
+    <div class="section">
+      <h3>1 · Revenue Analytics</h3>
+      <div class="sub-h">Current period · YoY · regional · channel · product mix</div>
+
+      <div class="module-nav" style="margin-bottom:14px">
+        <div style="font-size:11px;letter-spacing:.16em;color:var(--muted);font-weight:700;padding:8px 8px 8px 0">VIEW METRIC:</div>
+        ${switcher}
+      </div>
+
+      <div class="grid-2">
+        <div class="card"><h4>${meta.label} · Monthly</h4>
+          <div class="chart-wrap tall"><canvas id="ch-rev-monthly"></canvas></div>
+        </div>
+        <div class="card"><h4>Period 1 vs Period 2 · ${meta.label}</h4>
+          <div class="chart-wrap tall"><canvas id="ch-rev-period"></canvas></div>
+          ${M==='Growth %' ? `
+            <div class="insight"><b>${fmtPct(growthRev)}</b> revenue growth period-over-period · driven by <b>${topGrowthDriver(p1,p2)}</b>.</div>
+          ` : `
+            <div class="insight"><b>P1:</b> ${meta.fmt(meta.p1)} · <b>P2:</b> ${meta.fmt(meta.p2)} · ${meta.p1!==0?'change <b>'+fmtPct(((meta.p2-meta.p1)/Math.abs(meta.p1))*100)+'</b>':'baseline (no P1 data)'}.</div>
+          `}
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:14px">
+        <div class="card"><h4>By Region · ${meta.label}</h4>
+          <div class="chart-wrap"><canvas id="ch-rev-region"></canvas></div>
+          ${groupTable(regAgg,'Region')}
+        </div>
+        <div class="card"><h4>By Channel · ${meta.label}</h4>
+          <div class="chart-wrap"><canvas id="ch-rev-channel"></canvas></div>
+          ${groupTable(chAgg,'Channel')}
+        </div>
+        <div class="card"><h4>By Category · ${meta.label}</h4>
+          <div class="chart-wrap"><canvas id="ch-rev-cat"></canvas></div>
+          ${groupTable(catAgg,'Category')}
+        </div>
+      </div>
+    </div>`;
+
+  // ===== Charts =====
+  // Monthly trend (always line; for Revenue overlay Profit too)
+  const monthlyDatasets = M==='Revenue' ? [
+    {label:'Revenue',data:months.map(m=>monthly[m].rev),borderColor:'#c8102e',backgroundColor:'rgba(200,16,46,.08)',tension:.3,fill:true},
+    {label:'Profit', data:months.map(m=>monthly[m].prof),borderColor:'#0c0d10',backgroundColor:'rgba(12,13,16,.05)',tension:.3,fill:true},
+  ] : [
+    {label:meta.label,data:monthlyVals,borderColor:meta.color,backgroundColor:meta.color+'22',tension:.3,fill:true},
+  ];
+  chart('ch-rev-monthly',{
+    type:'line',
+    data:{labels:months,datasets:monthlyDatasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'Inter',size:11},boxWidth:10,boxHeight:10}}},
+      scales:{y:{beginAtZero:M!=='Profit Margin' && M!=='Growth %',grid:{color:'#f0efe9'}},x:{grid:{display:false}}}
+    }
+  });
+
+  // Period 1 vs Period 2
+  chart('ch-rev-period',{
+    type:'bar',
+    data:{labels:['Period 1','Period 2'],datasets:[
+      {label:meta.label,data:[meta.p1,meta.p2],backgroundColor:['#cdccc6',meta.color]},
+    ]},
+    options:chartOpts()
+  });
+
+  // By Region (donut for Revenue/Units, bar for Margin/Growth)
+  if(meta.donut){
+    chart('ch-rev-region',{
+      type:'doughnut',
+      data:{labels:regAgg.map(r=>r.key),datasets:[{data:regAgg.map(r=>r[M]),backgroundColor:palette(regAgg.length)}]},
+      options:chartOpts({legend:true})
+    });
+  } else {
+    chart('ch-rev-region',{
+      type:'bar',
+      data:{labels:regAgg.map(r=>r.key),datasets:[{label:meta.label,data:regAgg.map(r=>r[M]),
+        backgroundColor:regAgg.map(r=>M==='Growth %'?(r[M]>=0?'#1f7a4c':'#b3261e'):meta.color)}]},
+      options:chartOpts()
+    });
+  }
+
+  // By Channel / Category (bar)
+  chart('ch-rev-channel',{
+    type:'bar',
+    data:{labels:chAgg.map(r=>r.key),datasets:[{label:meta.label,data:chAgg.map(r=>r[M]),
+      backgroundColor:chAgg.map(r=>M==='Growth %'?(r[M]>=0?'#1f7a4c':'#b3261e'):meta.color)}]},
+    options:chartOpts()
+  });
+  chart('ch-rev-cat',{
+    type:'bar',
+    data:{labels:catAgg.map(r=>r.key),datasets:[{label:meta.label,data:catAgg.map(r=>r[M]),
+      backgroundColor:catAgg.map(r=>M==='Growth %'?(r[M]>=0?'#1f7a4c':'#b3261e'):'#0c0d10')}]},
+    options:chartOpts()
+  });
+}
+function aggByGroup(rows,key,fields){
+  const g = groupBy(rows,r=>r[key]||'—');
+  const out = Object.entries(g).map(([k,rs])=>{
+    const o={key:k};
+    fields.forEach(f=>o[f]=sumBy(rs,r=>+r[f]||0));
+    o.Count=rs.length;
+    return o;
+  });
+  return out.sort((a,b)=>b[fields[0]]-a[fields[0]]);
+}
+function tableTop(agg,n,k,m){
+  const tot = agg.reduce((s,r)=>s+r[m],0);
+  return `<table class="data"><thead><tr><th>${k}</th><th class="num">${m}</th><th class="num">% share</th></tr></thead><tbody>
+  ${agg.slice(0,n).map(r=>`<tr><td>${r.key}</td><td class="num">${fmtMoney(r[m])}</td><td class="num">${((r[m]/Math.max(tot,1))*100).toFixed(1)}%</td></tr>`).join('')}
+  </tbody></table>`;
+}
+function topGrowthDriver(p1,p2){
+  // Find which category drove biggest delta
+  const a1 = aggByGroup(p1,'Category',['Revenue']);
+  const a2 = aggByGroup(p2,'Category',['Revenue']);
+  const map = {};
+  a1.forEach(r=>map[r.key]={p1:r.Revenue,p2:0});
+  a2.forEach(r=>{map[r.key]=map[r.key]||{p1:0,p2:0};map[r.key].p2=r.Revenue;});
+  const arr = Object.entries(map).map(([k,v])=>({k,d:v.p2-v.p1})).sort((a,b)=>b.d-a.d);
+  return arr.length ? arr[0].k : '—';
+}
+
+/* ===================================================================== */
+/* ===== MODULE 2 — SKU INTELLIGENCE ==================================== */
+/* ===================================================================== */
+function renderSKU(){
+  const rs = STATE.filtered;
+  const pane = document.getElementById('pane-sku');
+
+  // ===== Per-SKU aggregates =====
+  const bySku = aggByGroup(rs, 'Product', ['Revenue', 'Profit', 'Units']);
+  bySku.forEach(s=>{
+    const ref = rs.find(r=>r.Product===s.key);
+    s.Category = ref ? ref.Category : '—';
+    s.Cost = s.Revenue - s.Profit;
+    s['Profit %'] = s.Cost>0 ? (s.Profit/s.Cost)*100 : 0;
+    s.AvgPrice = s.Units>0 ? s.Revenue/s.Units : 0;
+  });
+
+  const profitPctList = bySku.map(s=>s['Profit %']);
+  const profitP30 = pctile(profitPctList, .3);
+  const profitP70 = pctile(profitPctList, .7);
+  bySku.forEach(s=>{
+    s.IsProfitable    = s.Profit > 0;
+    s.IsHighMargin    = s['Profit %'] >= profitP70;
+    s.IsLowPerformer  = s['Profit %'] <= profitP30;
+  });
+
+  // ===== Dead inventory: no sale in 90+ days =====
+  const today = new Date();
+  const skuLastSale = {};
+  rs.forEach(r=>{
+    if(r.Date && (!skuLastSale[r.Product] || r.Date > skuLastSale[r.Product])){
+      skuLastSale[r.Product] = r.Date;
+    }
+  });
+  const allSkusInData = uniq(STATE.clean ? STATE.clean.map(r=>r.Product) : rs.map(r=>r.Product));
+  const dead = allSkusInData.map(sku=>{
+    const last = skuLastSale[sku];
+    const daysSince = last ? Math.floor((today - last)/(1000*60*60*24)) : 9999;
+    const lastInvRow = (STATE.clean||rs).filter(r=>r.Product===sku).sort((a,b)=>(b.Date||0)-(a.Date||0))[0];
+    return {
+      sku, daysSince,
+      lastDate: last,
+      inventory: lastInvRow?.Inventory ?? null,
+      category: lastInvRow?.Category || '—',
+    };
+  }).filter(s=>s.daysSince>=90 && (s.inventory||0)>0)
+    .sort((a,b)=>b.daysSince-a.daysSince);
+
+  // ===== Top winners (high margin) / Bottom performers (low margin) =====
+  const winners = [...bySku].filter(s=>s.IsHighMargin).sort((a,b)=>b['Profit %']-a['Profit %']).slice(0,8);
+  const losers  = [...bySku].filter(s=>s.IsLowPerformer).sort((a,b)=>a['Profit %']-b['Profit %']).slice(0,8);
+
+  // ===== Category growth (Period 2 vs Period 1) =====
+  const {p1,p2} = periodSplit(rs);
+  const cat1 = aggByGroup(p1,'Category',['Units','Revenue']);
+  const cat2 = aggByGroup(p2,'Category',['Units','Revenue']);
+  const cmap = {};
+  cat1.forEach(r=>{cmap[r.key]={p1u:r.Units,p2u:0,p1r:r.Revenue,p2r:0}});
+  cat2.forEach(r=>{cmap[r.key]=cmap[r.key]||{p1u:0,p2u:0,p1r:0,p2r:0}; cmap[r.key].p2u=r.Units; cmap[r.key].p2r=r.Revenue});
+  const growth = Object.entries(cmap).map(([k,v])=>({
+    key:k,
+    g: v.p1u>0 ? ((v.p2u-v.p1u)/v.p1u)*100 : (v.p2u>0?100:0),
+    p2u: v.p2u,
+  })).sort((a,b)=>b.g-a.g);
+  const catGrowthMap = {};
+  growth.forEach(g=>catGrowthMap[g.key]=g.g);
+
+  // ===== Product trend forecast: market-driven (category growth) =====
+  const skuForecast = bySku.map(s=>{
+    const skuP1 = sumBy(p1.filter(r=>r.Product===s.key), r=>r.Units);
+    const skuP2 = sumBy(p2.filter(r=>r.Product===s.key), r=>r.Units);
+    const ownGrowth = skuP1>0 ? ((skuP2-skuP1)/skuP1)*100 : (skuP2>0?100:0);
+    const marketGrowth = catGrowthMap[s.Category] || 0;
+    const forecastUnits = skuP2 * (1 + marketGrowth/100);
+    const forecastRevenue = forecastUnits * s.AvgPrice;
+    return {
+      sku: s.key, category: s.Category, p1Units: skuP1, p2Units: skuP2,
+      ownGrowth, marketGrowth, forecastUnits, forecastRevenue, profitPct: s['Profit %'],
+    };
+  }).filter(f=>f.p2Units>0)
+    .sort((a,b)=>b.forecastUnits-a.forecastUnits)
+    .slice(0,14);
+
+  const profitableCount = bySku.filter(s=>s.IsProfitable).length;
+  const highMarginCount = bySku.filter(s=>s.IsHighMargin).length;
+  const lowPerformerCount = bySku.filter(s=>s.IsLowPerformer).length;
+  const totalSku = uniq(rs.map(r=>r.Product)).length;
+
+  pane.innerHTML = `
+    <div class="section">
+      <h3>2 · SKU Intelligence Engine</h3>
+      <div class="sub-h">Profitable · high-margin · low-performers · dead inventory · market-driven trend forecast</div>
+
+      <div class="kpi-grid">
+        <div class="kpi"><div class="accent"></div><div class="l">SKUs ANALYZED</div><div class="v">${totalSku}</div><div class="d up">Across ${uniq(rs.map(r=>r.Category)).length} categories</div></div>
+        <div class="kpi"><div class="accent"></div><div class="l">✅ PROFITABLE</div><div class="v">${profitableCount}</div><div class="d up">Positive profit margin</div></div>
+        <div class="kpi"><div class="accent"></div><div class="l">💎 HIGH MARGIN</div><div class="v">${highMarginCount}</div><div class="d up">Top 30%ile profit (≥ ${profitP70.toFixed(1)}%)</div></div>
+        <div class="kpi"><div class="accent"></div><div class="l">⚠️ LOW PERFORMERS</div><div class="v">${lowPerformerCount}</div><div class="d down">Bottom 30%ile (≤ ${profitP30.toFixed(1)}%)</div></div>
+      </div>
+
+      <!-- Winners / Losers charts -->
+      <div class="grid-eq">
+        <div class="card"><h4>💎 High-Margin Winners · top 30%ile profit %</h4>
+          <div class="chart-wrap"><canvas id="ch-sku-winners"></canvas></div>
+          <table class="data" style="margin-top:8px"><thead><tr><th>SKU</th><th class="num">Profit %</th><th class="num">Revenue</th></tr></thead><tbody>
+          ${winners.map(s=>`<tr><td>${truncate(s.key,28)}</td><td class="num"><span class="tag green">${s['Profit %'].toFixed(1)}%</span></td><td class="num">${fmtMoney(s.Revenue)}</td></tr>`).join('')}
+          </tbody></table>
+        </div>
+        <div class="card"><h4>⚠️ Low-Performing SKUs · bottom 30%ile</h4>
+          <div class="chart-wrap"><canvas id="ch-sku-losers"></canvas></div>
+          <table class="data" style="margin-top:8px"><thead><tr><th>SKU</th><th class="num">Profit %</th><th class="num">Revenue</th></tr></thead><tbody>
+          ${losers.map(s=>`<tr><td>${truncate(s.key,28)}</td><td class="num"><span class="tag red">${s['Profit %'].toFixed(1)}%</span></td><td class="num">${fmtMoney(s.Revenue)}</td></tr>`).join('')}
+          </tbody></table>
+        </div>
+      </div>
+
+      <!-- Dead inventory list -->
+      <div class="card" style="margin-top:14px"><h4>🧨 Dead Inventory · SKUs unsold for 90+ days with stock on hand</h4>
+        ${dead.length ? `
+        <table class="data"><thead><tr><th>SKU</th><th>Category</th><th class="num">Days since last sale</th><th class="num">Inventory left</th><th>Action</th></tr></thead><tbody>
+        ${dead.slice(0,12).map(d=>`<tr>
+          <td><b>${d.sku}</b></td>
+          <td>${d.category}</td>
+          <td class="num"><span class="tag ${d.daysSince>=180?'red':'amber'}">${d.daysSince}d</span></td>
+          <td class="num">${fmt(d.inventory)}</td>
+          <td>${d.daysSince>=180?'<span class="tag red">CLEAR — heavy discount or write-off</span>':'<span class="tag amber">Promotion + redistribution</span>'}</td>
+        </tr>`).join('')}
+        </tbody></table>
+        ` : '<div class="insight good">✅ No dead inventory. Every SKU sold within the last 90 days.</div>'}
+      </div>
+
+      <!-- Product Trend Forecast (market-driven) -->
+      <div class="card" style="margin-top:14px;background:linear-gradient(135deg,#fff,#fbf2f3);border-left:4px solid var(--brand)">
+        <h4>🔮 Product Trend Forecast · market-driven demand projection</h4>
+        <div class="micro" style="margin-bottom:10px">Forecast = <code>current units × (1 + <b>category market growth %</b>)</code>. Uses <b>category-level</b> growth (proxy for true market trend across all brands in that category) rather than the SKU's own growth, so we capture <i>where the market is heading</i>, not just where our brand happens to sit today.</div>
+        <div class="chart-wrap tall"><canvas id="ch-sku-forecast"></canvas></div>
+        <table class="data" style="margin-top:10px"><thead><tr><th>SKU</th><th>Category</th><th class="num">P1 units</th><th class="num">P2 units</th><th class="num">Market growth</th><th class="num">Forecast (next period)</th><th class="num">Forecast Revenue</th><th>Recommendation</th></tr></thead><tbody>
+        ${skuForecast.map(f=>{
+          const lift = f.p2Units>0 ? ((f.forecastUnits-f.p2Units)/f.p2Units)*100 : 0;
+          let rec = '';
+          if(f.marketGrowth>=10 && f.profitPct>=profitP70) rec='<span class="tag green">SCALE — market rising + we earn margin</span>';
+          else if(f.marketGrowth>=10) rec='<span class="tag blue">PUSH — ride the market wave</span>';
+          else if(f.marketGrowth<-5)  rec='<span class="tag red">REDUCE — market declining</span>';
+          else rec='<span class="tag amber">MAINTAIN</span>';
+          return `<tr>
+            <td><b>${truncate(f.sku,28)}</b></td>
+            <td>${f.category}</td>
+            <td class="num">${fmt(f.p1Units)}</td>
+            <td class="num">${fmt(f.p2Units)}</td>
+            <td class="num"><span class="tag ${f.marketGrowth>=10?'green':f.marketGrowth>=0?'amber':'red'}">${fmtPct(f.marketGrowth)}</span></td>
+            <td class="num"><b>${fmt(f.forecastUnits)}</b></td>
+            <td class="num">${fmtMoney(f.forecastRevenue)}</td>
+            <td>${rec}</td>
+          </tr>`;
+        }).join('')}
+        </tbody></table>
+        <div class="insight good" style="margin-top:8px">🤖 <b>Why market growth not own growth:</b> if our coffee SKU is down 5% but the coffee market is up 20%, our brand is losing share — the forecast should reflect the headwind <i>opportunity</i>, then we close the gap with marketing / distribution / placement.</div>
+      </div>
+
+      <!-- Category growth + Rationalization -->
+      <div class="grid-eq" style="margin-top:14px">
+        <div class="card"><h4>Category growth rate (Period 2 vs Period 1)</h4>
+          <div class="chart-wrap"><canvas id="ch-sku-grow"></canvas></div>
+          <div class="insight good">🤖 <b>AI says:</b> Push more SKUs in <b>${growth[0]?.key||'—'}</b> (${growth[0]?fmtPct(growth[0].g):'—'}). Reduce promotions in <b>${growth[growth.length-1]?.key||'—'}</b>.</div>
+        </div>
+        <div class="card"><h4>SKU Rationalization Candidates</h4>
+          <table class="data"><thead><tr><th>SKU</th><th class="num">Revenue</th><th class="num">Profit %</th><th>Status</th></tr></thead><tbody>
+          ${losers.map(s=>`<tr><td>${truncate(s.key,28)}</td><td class="num">${fmtMoney(s.Revenue)}</td><td class="num">${s['Profit %'].toFixed(1)}%</td><td><span class="tag red">DROP</span></td></tr>`).join('')}
+          </tbody></table>
+        </div>
+      </div>
+    </div>`;
+
+  chart('ch-sku-winners',{type:'bar',data:{labels:winners.map(s=>truncate(s.key,18)),datasets:[{label:'Profit %',data:winners.map(s=>s['Profit %']),backgroundColor:'#1f7a4c'}]},options:chartOpts({horiz:true})});
+  chart('ch-sku-losers',{type:'bar',data:{labels:losers.map(s=>truncate(s.key,18)),datasets:[{label:'Profit %',data:losers.map(s=>s['Profit %']),backgroundColor:'#b3261e'}]},options:chartOpts({horiz:true})});
+  chart('ch-sku-grow',{type:'bar',data:{labels:growth.map(g=>g.key),datasets:[{label:'Growth %',data:growth.map(g=>g.g),backgroundColor:growth.map(g=>g.g>=0?'#1f7a4c':'#b3261e')}]},options:chartOpts()});
+
+  chart('ch-sku-forecast',{
+    type:'bar',
+    data:{labels:skuForecast.map(f=>truncate(f.sku,20)),datasets:[
+      {label:'P2 units (current)',  data:skuForecast.map(f=>f.p2Units),       backgroundColor:'#0c0d10'},
+      {label:'Forecast units (next)', data:skuForecast.map(f=>f.forecastUnits), backgroundColor:'#c8102e'},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'Inter',size:11},boxWidth:10,boxHeight:10}}},
+      scales:{y:{beginAtZero:true,grid:{color:'#f0efe9'}},x:{grid:{display:false},ticks:{maxRotation:45,minRotation:30}}}
+    }
+  });
+}
+function truncate(s,n){s=String(s);return s.length>n?s.slice(0,n-1)+'…':s;}
+
+/* ===================================================================== */
+/* ===== MODULE 3 — MARKETING =========================================== */
+/* ===================================================================== */
+function renderMarketing(){
+  const rs = STATE.filtered;
+  const pane = document.getElementById('pane-marketing');
+  const byCh = aggByGroup(rs.filter(r=>r['Marketing Channel'] && r['Marketing Channel']!=='—'),'Marketing Channel',['Revenue']);
+  byCh.forEach(b=>{
+    b.Customers = uniq(rs.filter(r=>r['Marketing Channel']===b.key).map(r=>r.Customer)).length;
+    b.Spend = STATE.adSpend[b.key] || STATE.adSpend['Other'] || 0;
+    b.ROAS = b.Spend>0 ? b.Revenue/b.Spend : null;
+    b.CAC  = b.Customers>0 ? b.Spend/b.Customers : null;
+  });
+
+  const adSpendInputs = byCh.map(b=>`
+    <div><label>${b.key}</label>
+      <input type="number" min="0" data-ch="${b.key}" value="${b.Spend}" oninput="updateSpend(this)"/>
+    </div>`).join('');
+
+  pane.innerHTML = `
+    <div class="section">
+      <h3>3 · Marketing Efficiency Engine</h3>
+      <div class="sub-h">ROAS · CAC · channel mix · budget reallocation</div>
+
+      <div class="card" style="margin-bottom:14px">
+        <h4>Enter Ad Spend per Channel</h4>
+        <div class="ad-spend">${adSpendInputs || '<div class="micro">No Marketing Channel column detected.</div>'}</div>
+        <div class="micro">Spend powers ROAS &amp; CAC calculations. Save updates by hitting <b>Apply Filters</b> or re-running <b>Generate</b>.</div>
+      </div>
+
+      <div class="grid-eq">
+        <div class="card"><h4>Revenue by Marketing Channel</h4>
+          <div class="chart-wrap"><canvas id="ch-mkt-rev"></canvas></div>
+        </div>
+        <div class="card"><h4>ROAS vs CAC</h4>
+          <div class="chart-wrap"><canvas id="ch-mkt-roas"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px"><h4>Channel scorecard</h4>
+        <table class="data"><thead><tr><th>Channel</th><th class="num">Customers</th><th class="num">Revenue</th><th class="num">Spend</th><th class="num">ROAS</th><th class="num">CAC</th><th>Recommendation</th></tr></thead><tbody>
+        ${byCh.map(b=>`<tr>
+          <td>${b.key}</td>
+          <td class="num">${b.Customers}</td>
+          <td class="num">${fmtMoney(b.Revenue)}</td>
+          <td class="num">${fmtMoney(b.Spend)}</td>
+          <td class="num">${b.ROAS==null?'—':b.ROAS.toFixed(2)+'×'}</td>
+          <td class="num">${b.CAC==null?'—':fmtMoney(b.CAC)}</td>
+          <td>${b.ROAS!=null && b.ROAS>=3?'<span class="tag green">SCALE UP</span>':b.ROAS!=null && b.ROAS<1?'<span class="tag red">CUT</span>':'<span class="tag amber">OPTIMIZE</span>'}</td>
+        </tr>`).join('')}
+        </tbody></table>
+      </div>
+
+      <div class="insight good" style="margin-top:12px">🤖 <b>AI recommendation:</b> Reallocate budget from low-ROAS channels (&lt;1×) into top performers (&gt;3×). High-converting segment: <b>${topConvertingSegment()}</b>.</div>
+    </div>`;
+
+  chart('ch-mkt-rev',{type:'bar',data:{labels:byCh.map(b=>b.key),datasets:[{label:'Revenue',data:byCh.map(b=>b.Revenue),backgroundColor:'#c8102e'}]},options:chartOpts()});
+  chart('ch-mkt-roas',{
+    type:'bar',
+    data:{labels:byCh.map(b=>b.key),datasets:[
+      {label:'ROAS',data:byCh.map(b=>b.ROAS||0),backgroundColor:'#1f7a4c',yAxisID:'y'},
+      {label:'CAC',data:byCh.map(b=>b.CAC||0),backgroundColor:'#0c0d10',yAxisID:'y1'},
+    ]},options:{...chartOpts({legend:true}),scales:{y:{position:'left'},y1:{position:'right',grid:{drawOnChartArea:false}}}}
+  });
+}
+function updateSpend(el){
+  STATE.adSpend[el.dataset.ch] = parseFloat(el.value)||0;
+}
+function topConvertingSegment(){
+  const rs = STATE.filtered;
+  const cust = groupBy(rs,r=>r.Customer);
+  const segments = {};
+  for(const c of Object.keys(cust)){
+    const cs = cust[c];
+    const reg = cs[0].Region;
+    if(!segments[reg]) segments[reg]={rev:0,n:0};
+    segments[reg].rev += sumBy(cs,r=>r.Revenue);
+    segments[reg].n += 1;
+  }
+  const arr = Object.entries(segments).map(([k,v])=>({k,v:v.rev/Math.max(v.n,1)})).sort((a,b)=>b.v-a.v);
+  return arr.length?arr[0].k:'—';
+}
+
+/* ===================================================================== */
+/* ===== MODULE 4 — CUSTOMER ============================================ */
+/* ===================================================================== */
+function renderCustomer(){
+  const rs = STATE.filtered;
+  const pane = document.getElementById('pane-customer');
+  const {p1, p2} = periodSplit(rs);
+  const p1Cust = groupBy(p1, r=>r.Customer);
+  const p2Cust = groupBy(p2, r=>r.Customer);
+
+  // ===== Per-customer aggregates =====
+  const byC = groupBy(rs, r=>r.Customer);
+  const cust = Object.entries(byC).map(([c, rows])=>{
+    const tot = sumBy(rows, r=>r.Revenue);
+    const orders = rows.length;
+    const dates = rows.map(r=>r.Date).filter(Boolean).sort((a,b)=>a-b);
+    const spanMo = dates.length>1 ? Math.max(0.5,(dates[dates.length-1]-dates[0])/(1000*60*60*24*30)) : 0.5;
+    const npsVals = rows.map(r=>r.NPS).filter(v=>v!=null);
+    const discountedOrders = rows.filter(r=>(r.Discount||0)>0).length;
+    const p1n = (p1Cust[c]||[]).length;
+    const p2n = (p2Cust[c]||[]).length;
+    return {
+      Customer: c,
+      Region: rows[0].Region,
+      CLV: tot,
+      Orders: orders,
+      AOV: orders>0 ? tot/orders : 0,
+      Frequency: orders / spanMo,
+      NPS: npsVals.length ? avg(npsVals) : null,
+      AvgDiscount: rows.length ? avg(rows.map(r=>r.Discount||0)) : 0,
+      DiscountShare: orders>0 ? discountedOrders/orders : 0,
+      P1Orders: p1n, P2Orders: p2n,
+      FreqTrend: p1n>0 ? ((p2n-p1n)/p1n)*100 : (p2n>0?100:0),
+      LastDate: dates.length ? dates[dates.length-1] : null,
+    };
+  });
+
+  if(!cust.length){
+    pane.innerHTML = '<div class="micro" style="padding:30px">No customer data in filtered set.</div>';
+    return;
+  }
+
+  // ===== Percentile thresholds =====
+  const clvList  = cust.map(c=>c.CLV);
+  const aovList  = cust.map(c=>c.AOV);
+  const freqList = cust.map(c=>c.Frequency);
+  const discList = cust.map(c=>c.AvgDiscount);
+  const clvP70  = pctile(clvList, .7);
+  const aovP70  = pctile(aovList, .7);
+  const freqP70 = pctile(freqList, .7);
+  const discP70 = pctile(discList, .7);
+
+  const rankPct = (v, arr) => arr.filter(x=>x<v).length / Math.max(arr.length-1,1);
+
+  // ===== Segment classification =====
+  cust.forEach(c=>{
+    c.IsLoyal             = c.Frequency >= freqP70;
+    c.IsPremium           = c.AOV >= aovP70;
+    c.IsChurnRisk         = (c.NPS!=null && c.NPS < 7) || c.FreqTrend < -20;
+    c.IsDiscountSensitive = c.AvgDiscount >= discP70 && c.DiscountShare >= 0.7;
+
+    // Loyalty Score: 40% CLV pct + 30% Freq pct + 30% NPS normalized
+    const clvPct  = rankPct(c.CLV, clvList) * 100;
+    const freqPct = rankPct(c.Frequency, freqList) * 100;
+    const npsPct  = c.NPS!=null ? (c.NPS/10)*100 : 50;
+    c.LoyaltyScore = clvPct*0.4 + freqPct*0.3 + npsPct*0.3;
+    c.LoyaltyTier  = c.LoyaltyScore>=80 ? 'Champion'
+                   : c.LoyaltyScore>=60 ? 'Loyal'
+                   : c.LoyaltyScore>=40 ? 'Casual' : 'At Risk';
+
+    // Primary tier — Churn-Risk overrides (most urgent)
+    if(c.IsChurnRisk)                    c.Tier = 'Churn-Risk';
+    else if(c.IsPremium && c.IsLoyal)    c.Tier = 'Premium + Loyal';
+    else if(c.IsPremium)                 c.Tier = 'Premium';
+    else if(c.IsLoyal)                   c.Tier = 'Loyal';
+    else if(c.IsDiscountSensitive)       c.Tier = 'Discount-Sensitive';
+    else                                 c.Tier = 'Value';
+  });
+
+  // ===== NPS / counts =====
+  const promoter  = cust.filter(c=>c.NPS!=null && c.NPS>=9).length;
+  const passive   = cust.filter(c=>c.NPS!=null && c.NPS>=7 && c.NPS<9).length;
+  const detractor = cust.filter(c=>c.NPS!=null && c.NPS<7).length;
+  const totalNPS  = promoter+passive+detractor;
+  const nps       = totalNPS>0 ? ((promoter-detractor)/totalNPS)*100 : null;
+  const loyalCount    = cust.filter(c=>c.IsLoyal).length;
+  const premiumCount  = cust.filter(c=>c.IsPremium).length;
+  const churnCount    = cust.filter(c=>c.IsChurnRisk).length;
+  const discountCount = cust.filter(c=>c.IsDiscountSensitive).length;
+  const champions     = cust.filter(c=>c.LoyaltyTier==='Champion').length;
+
+  // ===== Mixes =====
+  const tierAgg = {};
+  cust.forEach(c=>{tierAgg[c.Tier]=(tierAgg[c.Tier]||0)+1});
+  const loyaltyTierAgg = {Champion:0,Loyal:0,Casual:0,'At Risk':0};
+  cust.forEach(c=>loyaltyTierAgg[c.LoyaltyTier]++);
+
+  // ===== Top lists =====
+  const topLoyal    = [...cust].filter(c=>c.IsLoyal).sort((a,b)=>b.Frequency-a.Frequency).slice(0,8);
+  const topPremium  = [...cust].filter(c=>c.IsPremium).sort((a,b)=>b.AOV-a.AOV).slice(0,8);
+  const topChurn    = [...cust].filter(c=>c.IsChurnRisk).sort((a,b)=>a.LoyaltyScore-b.LoyaltyScore).slice(0,8);
+  const topDiscount = [...cust].filter(c=>c.IsDiscountSensitive).sort((a,b)=>b.AvgDiscount-a.AvgDiscount).slice(0,8);
+  const topLoyalty  = [...cust].sort((a,b)=>b.LoyaltyScore-a.LoyaltyScore).slice(0,10);
+  const topCLV      = [...cust].sort((a,b)=>b.CLV-a.CLV).slice(0,10);
+
+  pane.innerHTML = `
+    <div class="section">
+      <h3>4 · Customer Intelligence Engine</h3>
+      <div class="sub-h">Loyalty score · 4 named segments · NPS · churn · discount sensitivity</div>
+
+      <!-- NPS KPI tiles -->
+      <div class="kpi-grid">
+        <div class="kpi"><div class="accent"></div><div class="l">CUSTOMERS</div><div class="v">${fmt(cust.length)}</div><div class="d up">Active in period</div></div>
+        <div class="kpi"><div class="accent"></div><div class="l">PROMOTERS</div><div class="v">${fmt(promoter)}</div><div class="d up">NPS ≥ 9</div></div>
+        <div class="kpi"><div class="accent"></div><div class="l">DETRACTORS</div><div class="v">${fmt(detractor)}</div><div class="d down">NPS &lt; 7</div></div>
+        <div class="kpi"><div class="accent"></div><div class="l">NPS SCORE</div><div class="v">${nps==null?'—':nps.toFixed(0)}</div><div class="d ${nps>=30?'up':'down'}">Industry b/m ~30</div></div>
+      </div>
+
+      <!-- Named-segment KPI tiles -->
+      <div class="kpi-grid">
+        <div class="kpi"><div class="accent"></div><div class="l">🔁 LOYAL</div><div class="v">${fmt(loyalCount)}</div><div class="d up">Frequency top 30%ile (≥ ${freqP70.toFixed(2)}/mo)</div></div>
+        <div class="kpi"><div class="accent"></div><div class="l">💎 PREMIUM</div><div class="v">${fmt(premiumCount)}</div><div class="d up">AOV top 30%ile (≥ ${fmtMoney(aovP70)})</div></div>
+        <div class="kpi"><div class="accent"></div><div class="l">⚠️ CHURN-RISK</div><div class="v">${fmt(churnCount)}</div><div class="d down">NPS &lt; 7 OR freq dropped 20%+</div></div>
+        <div class="kpi"><div class="accent"></div><div class="l">🎟 DISCOUNT-SENS.</div><div class="v">${fmt(discountCount)}</div><div class="d down">70%+ orders discounted · avg ≥ ${discP70.toFixed(0)}%</div></div>
+      </div>
+
+      <!-- LOYALTY SCORE SECTION -->
+      <div class="card" style="margin-top:14px;background:linear-gradient(135deg,#fff,#fbf2f3);border-left:4px solid var(--brand)">
+        <h4>🏆 Customer Loyalty Score · composite (CLV + Frequency + NPS)</h4>
+        <div class="micro" style="margin-bottom:10px">Formula · <code>40% × CLV percentile + 30% × Frequency percentile + 30% × NPS normalized (0–100)</code>. A single 0–100 score that captures loyalty across three dimensions. <b>${champions}</b> Champions identified.</div>
+        <div class="grid-eq" style="margin-bottom:12px">
+          <div>
+            <div class="chart-wrap"><canvas id="ch-cust-loyalty-dist"></canvas></div>
+            <div class="micro" style="margin-top:6px">Distribution by tier · <b>Champion ≥ 80</b>, Loyal 60–80, Casual 40–60, At Risk &lt; 40.</div>
+          </div>
+          <div>
+            <h4 style="font-family:Inter;font-size:12px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">Top 10 Loyalty Champions</h4>
+            <table class="data"><thead><tr><th>Customer</th><th class="num">Score</th><th class="num">CLV</th><th class="num">Freq/mo</th><th>NPS</th></tr></thead><tbody>
+            ${topLoyalty.map(c=>`<tr><td><b>${c.Customer}</b></td><td class="num"><b>${c.LoyaltyScore.toFixed(0)}</b></td><td class="num">${fmtMoney(c.CLV)}</td><td class="num">${c.Frequency.toFixed(2)}</td><td>${c.NPS==null?'—':c.NPS.toFixed(1)}</td></tr>`).join('')}
+            </tbody></table>
+          </div>
+        </div>
+        <div class="insight good">🤖 <b>Treat Champions like VIPs:</b> early access, concierge support, dedicated account manager, no discount needed. Treat <b>At Risk</b> like a recovery patient — win-back campaign, surprise upgrade, personalised outreach.</div>
+      </div>
+
+      <!-- Segment Mix + CLV Distribution -->
+      <div class="grid-eq" style="margin-top:14px">
+        <div class="card"><h4>Customer Segment Mix</h4>
+          <div class="chart-wrap"><canvas id="ch-cust-tier"></canvas></div>
+          <div class="micro" style="margin-top:6px">Primary tier per customer (Churn-Risk takes precedence when overlapping).</div>
+        </div>
+        <div class="card"><h4>CLV Distribution</h4>
+          <div class="chart-wrap"><canvas id="ch-cust-clv"></canvas></div>
+          <div class="insight">Top 10 customers contribute <b>${fmtPct((topCLV.reduce((s,c)=>s+c.CLV,0)/Math.max(cust.reduce((s,c)=>s+c.CLV,0),1))*100)}</b> of total revenue.</div>
+        </div>
+      </div>
+
+      <!-- Segment tables -->
+      <div class="grid-eq" style="margin-top:14px">
+        <div class="card"><h4>🔁 Loyal Customers · top by frequency</h4>
+          <div class="micro" style="margin-bottom:8px">Purchase frequency in top 30%ile. Reward with: early access to new SKUs, free shipping, referral bonus, status badges.</div>
+          <table class="data"><thead><tr><th>Customer</th><th>Region</th><th class="num">Orders/mo</th><th class="num">CLV</th><th class="num">Loyalty</th></tr></thead><tbody>
+          ${topLoyal.length ? topLoyal.map(c=>`<tr><td><b>${c.Customer}</b></td><td>${c.Region}</td><td class="num">${c.Frequency.toFixed(2)}</td><td class="num">${fmtMoney(c.CLV)}</td><td class="num">${c.LoyaltyScore.toFixed(0)}</td></tr>`).join('') : '<tr><td colspan="5" class="micro">None.</td></tr>'}
+          </tbody></table>
+        </div>
+        <div class="card"><h4>💎 Premium Buyers · top by AOV</h4>
+          <div class="micro" style="margin-bottom:8px">Average Order Value in top 30%ile. Target with: exclusive editions, concierge service, premium-tier loyalty perks.</div>
+          <table class="data"><thead><tr><th>Customer</th><th>Region</th><th class="num">AOV</th><th class="num">Orders</th><th class="num">CLV</th></tr></thead><tbody>
+          ${topPremium.length ? topPremium.map(c=>`<tr><td><b>${c.Customer}</b></td><td>${c.Region}</td><td class="num">${fmtMoney(c.AOV)}</td><td class="num">${c.Orders}</td><td class="num">${fmtMoney(c.CLV)}</td></tr>`).join('') : '<tr><td colspan="5" class="micro">None.</td></tr>'}
+          </tbody></table>
+        </div>
+      </div>
+
+      <div class="grid-eq" style="margin-top:14px">
+        <div class="card"><h4>⚠️ Churn-Risk Customers · prioritize win-back</h4>
+          <div class="micro" style="margin-bottom:8px">NPS &lt; 7 OR frequency dropped &gt; 20% P1 → P2. Action: personal call + service recovery + win-back offer.</div>
+          <table class="data"><thead><tr><th>Customer</th><th>NPS</th><th class="num">Freq trend</th><th class="num">CLV at risk</th><th>Trigger</th></tr></thead><tbody>
+          ${topChurn.length ? topChurn.map(c=>{
+            const triggers=[];
+            if(c.NPS!=null && c.NPS<7) triggers.push('Low NPS');
+            if(c.FreqTrend<-20) triggers.push('Freq dropping');
+            return `<tr><td><b>${c.Customer}</b></td><td>${c.NPS==null?'—':c.NPS.toFixed(1)}</td><td class="num"><span class="tag red">${fmtPct(c.FreqTrend)}</span></td><td class="num">${fmtMoney(c.CLV)}</td><td>${triggers.map(t=>`<span class="tag red" style="margin-right:4px">${t}</span>`).join('')}</td></tr>`;
+          }).join('') : '<tr><td colspan="5" class="micro">No customers at risk.</td></tr>'}
+          </tbody></table>
+        </div>
+        <div class="card"><h4>🎟 Discount-Sensitive Customers · price-driven</h4>
+          <div class="micro" style="margin-bottom:8px">70%+ of their orders discounted &amp; avg discount in top 30%ile. Action: targeted promo windows, bundles, no premium pricing.</div>
+          <table class="data"><thead><tr><th>Customer</th><th>Region</th><th class="num">Avg disc %</th><th class="num">% disc orders</th><th class="num">CLV</th></tr></thead><tbody>
+          ${topDiscount.length ? topDiscount.map(c=>`<tr><td><b>${c.Customer}</b></td><td>${c.Region}</td><td class="num">${c.AvgDiscount.toFixed(1)}%</td><td class="num">${(c.DiscountShare*100).toFixed(0)}%</td><td class="num">${fmtMoney(c.CLV)}</td></tr>`).join('') : '<tr><td colspan="5" class="micro">No clear discount-sensitive customers.</td></tr>'}
+          </tbody></table>
+        </div>
+      </div>
+
+      <!-- Top 10 CLV -->
+      <div class="card" style="margin-top:14px"><h4>Top 10 Customers by CLV</h4>
+        <table class="data"><thead><tr><th>Customer</th><th>Region</th><th class="num">CLV</th><th class="num">Orders</th><th>NPS</th><th class="num">Loyalty</th><th>Tier</th></tr></thead><tbody>
+        ${topCLV.map(c=>`<tr><td>${c.Customer}</td><td>${c.Region}</td><td class="num">${fmtMoney(c.CLV)}</td><td class="num">${c.Orders}</td><td>${c.NPS==null?'—':c.NPS.toFixed(1)}</td><td class="num">${c.LoyaltyScore.toFixed(0)}</td><td><span class="tag ${c.Tier.includes('Premium')?'green':c.Tier==='Loyal'?'blue':c.Tier==='Churn-Risk'?'red':c.Tier==='Discount-Sensitive'?'amber':'grey'}">${c.Tier}</span></td></tr>`).join('')}
+        </tbody></table>
+      </div>
+    </div>`;
+
+  chart('ch-cust-tier',{type:'doughnut',data:{labels:Object.keys(tierAgg),datasets:[{data:Object.values(tierAgg),backgroundColor:palette(Object.keys(tierAgg).length)}]},options:chartOpts({legend:true})});
+  const buckets = bucketize(cust.map(c=>c.CLV),8);
+  chart('ch-cust-clv',{type:'bar',data:{labels:buckets.labels,datasets:[{label:'Customers',data:buckets.counts,backgroundColor:'#c8102e'}]},options:chartOpts()});
+  chart('ch-cust-loyalty-dist',{type:'bar',data:{labels:Object.keys(loyaltyTierAgg),datasets:[{label:'Customers',data:Object.values(loyaltyTierAgg),backgroundColor:['#1f7a4c','#1f4a83','#b87900','#b3261e']}]},options:chartOpts()});
+}
+function bucketize(arr,n){
+  if(!arr.length) return {labels:[],counts:[]};
+  const mn=Math.min(...arr), mx=Math.max(...arr);
+  const w=(mx-mn)/n || 1;
+  const counts = Array(n).fill(0);
+  const labels = Array(n).fill(0).map((_,i)=>fmt(mn+i*w)+'–'+fmt(mn+(i+1)*w));
+  arr.forEach(v=>{
+    const i = Math.min(n-1, Math.floor((v-mn)/w));
+    counts[i]++;
+  });
+  return {labels,counts};
+}
+
+/* ===================================================================== */
+/* ===== MODULE 5 — SUPPLY CHAIN ======================================== */
+/* ===================================================================== */
+function renderSupply(){
+  const rs = STATE.filtered;
+  const pane = document.getElementById('pane-supply');
+
+  // ===== Warehouse-level metrics with COMPOSITE efficiency =====
+  const byWh = aggByGroup(rs,'Warehouse',['Revenue','Units']);
+  byWh.forEach(w=>{
+    const wRows = rs.filter(r=>r.Warehouse===w.key);
+    const shipDays = wRows.map(r=>r['Ship Days']).filter(v=>v!=null);
+    w.AvgShip = shipDays.length ? avg(shipDays) : null;
+    w.Stockouts = wRows.filter(r=>r.Stockout).length;
+    w.StockoutRate = wRows.length>0 ? (w.Stockouts/wRows.length)*100 : 0;
+    w.Inv = sumBy(wRows,r=>r.Inventory||0);
+    w.Turnover = w.Inv>0 ? w.Units/w.Inv : null;
+    // Turnover interpretation
+    if(w.Turnover==null)         w.TurnoverHealth = '—';
+    else if(w.Turnover>=4)       w.TurnoverHealth = 'HEALTHY';
+    else if(w.Turnover>=1)       w.TurnoverHealth = 'ACCEPTABLE';
+    else if(w.Turnover>=0.1)     w.TurnoverHealth = 'SLOW';
+    else                         w.TurnoverHealth = 'STAGNANT';
+
+    // Composite efficiency: 100 − ship_penalty − stockout_penalty
+    const shipPenalty     = w.AvgShip!=null ? Math.min(50, w.AvgShip*8) : 25;
+    const stockoutPenalty = Math.min(50, w.StockoutRate);
+    w.EffScore = Math.max(0, Math.round(100 - shipPenalty - stockoutPenalty));
+    w.EffTier  = w.EffScore>=80 ? 'High' : w.EffScore>=60 ? 'Medium' : 'Low';
+  });
+
+  // ===== Per-warehouse expiry risk (clearance vs expiry) =====
+  const today = new Date();
+  // Daily sales rate per SKU+Warehouse
+  const skuWhRate = {};
+  rs.forEach(r=>{
+    if(!r.Date) return;
+    const key = `${r.Warehouse}|${r.Product}`;
+    if(!skuWhRate[key]) skuWhRate[key] = {units:0, dates:[]};
+    skuWhRate[key].units += r.Units;
+    skuWhRate[key].dates.push(r.Date);
+  });
+  Object.values(skuWhRate).forEach(s=>{
+    s.dates.sort((a,b)=>a-b);
+    const span = s.dates.length>1 ? Math.max(1,(s.dates[s.dates.length-1]-s.dates[0])/(1000*60*60*24)) : 30;
+    s.rate = s.units/span;
+  });
+  const whExpiryRows = [];
+  rs.forEach(r=>{
+    if(!r.Expiry || r.Inventory==null) return;
+    const key = `${r.Warehouse}|${r.Product}`;
+    const rate = Math.max(skuWhRate[key]?.rate || 0.01, 0.01);
+    const daysOfStock = r.Inventory / rate;
+    const daysToExpiry = (r.Expiry - today)/(1000*60*60*24);
+    const gap = daysToExpiry - daysOfStock;
+    let risk;
+    if(gap<90) risk='High';
+    else if(gap<180) risk='Medium';
+    else risk='Low';
+    whExpiryRows.push({Warehouse:r.Warehouse, Product:r.Product, Inventory:r.Inventory,
+                       DaysOfStock:daysOfStock, DaysToExpiry:daysToExpiry, Gap:gap, Risk:risk});
+  });
+  const whExpiry = Object.entries(groupBy(whExpiryRows, r=>r.Warehouse)).map(([wh, rows])=>{
+    const n = Math.max(rows.length,1);
+    const hi=rows.filter(r=>r.Risk==='High').length;
+    const md=rows.filter(r=>r.Risk==='Medium').length;
+    const lo=rows.filter(r=>r.Risk==='Low').length;
+    return {Warehouse:wh, Total:rows.length, High:hi, Medium:md, Low:lo,
+            HighPct:(hi/n)*100, MediumPct:(md/n)*100, LowPct:(lo/n)*100};
+  }).sort((a,b)=>b.HighPct-a.HighPct);
+
+  // ===== Vendor dependency =====
+  const byVen = aggByGroup(rs,'Vendor',['Revenue']);
+  const totalRev = sumBy(rs,r=>r.Revenue);
+  byVen.forEach(v=>{
+    v.Share = (v.Revenue/Math.max(totalRev,1))*100;
+    const eq = 100/byVen.length;
+    v.Dep = v.Share>eq?'High':v.Share>10?'Medium':'Low';
+  });
+
+  // ===== Replenishment priority list =====
+  const replenish = byWh.filter(w=>w.EffTier==='Low' || w.StockoutRate>10)
+    .map(w=>({...w, Priority: (100-w.EffScore) + w.StockoutRate}))
+    .sort((a,b)=>b.Priority-a.Priority);
+
+  const totalStockouts = rs.filter(r=>r.Stockout).length;
+  const expiryHighTotal = whExpiryRows.filter(r=>r.Risk==='High').length;
+
+  pane.innerHTML = `
+    <div class="section">
+      <h3>5 · Supply Chain Optimization Engine</h3>
+      <div class="sub-h">Composite efficiency · turnover · per-warehouse expiry risk · vendor concentration · replenishment</div>
+
+      <div class="kpi-grid">
+        <div class="kpi"><div class="accent"></div><div class="l">WAREHOUSES</div><div class="v">${byWh.length}</div><div class="d ${byWh.filter(w=>w.EffTier==='High').length>0?'up':'down'}">${byWh.filter(w=>w.EffTier==='High').length} high efficiency</div></div>
+        <div class="kpi"><div class="accent"></div><div class="l">STOCKOUTS</div><div class="v">${totalStockouts}</div><div class="d down">${((totalStockouts/Math.max(rs.length,1))*100).toFixed(1)}% of all transactions</div></div>
+        <div class="kpi"><div class="accent"></div><div class="l">HIGH EXPIRY RISK</div><div class="v">${expiryHighTotal}</div><div class="d down">SKU rows · clear within 3 mo</div></div>
+        <div class="kpi"><div class="accent"></div><div class="l">VENDOR CONC.</div><div class="v">${byVen.filter(v=>v.Dep==='High').length}</div><div class="d down">High-dependency vendors</div></div>
+      </div>
+
+      <!-- Composite efficiency table -->
+      <div class="card"><h4>🏭 Warehouse Composite Efficiency Score</h4>
+        <div class="micro" style="margin-bottom:8px">Score = <code>100 − (avg ship days × 8) − stockout rate %</code>. Capped at penalties of 50 each. Combines speed AND reliability into one number.</div>
+        <div class="chart-wrap"><canvas id="ch-sup-wh"></canvas></div>
+        <table class="data" style="margin-top:8px"><thead><tr><th>Warehouse</th><th class="num">Units</th><th class="num">Avg Ship Days</th><th class="num">Stockout %</th><th class="num">Eff. Score</th><th>Tier</th><th class="num">Turnover</th><th>Turnover Health</th></tr></thead><tbody>
+        ${byWh.map(w=>`<tr>
+          <td><b>${w.key}</b></td>
+          <td class="num">${fmt(w.Units)}</td>
+          <td class="num">${w.AvgShip==null?'—':w.AvgShip.toFixed(1)+'d'}</td>
+          <td class="num">${w.StockoutRate.toFixed(1)}%</td>
+          <td class="num"><b>${w.EffScore}</b>/100</td>
+          <td><span class="tag ${w.EffTier==='High'?'green':w.EffTier==='Medium'?'amber':'red'}">${w.EffTier}</span></td>
+          <td class="num">${w.Turnover==null?'—':w.Turnover.toFixed(3)}</td>
+          <td><span class="tag ${w.TurnoverHealth==='HEALTHY'?'green':w.TurnoverHealth==='ACCEPTABLE'?'blue':w.TurnoverHealth==='SLOW'?'amber':w.TurnoverHealth==='STAGNANT'?'red':'grey'}">${w.TurnoverHealth}</span></td>
+        </tr>`).join('')}
+        </tbody></table>
+        <div class="insight" style="margin-top:10px">
+          📖 <b>How to read inventory turnover:</b> <code>turnover = units sold ÷ average inventory level</code>. It tells you how many times your stock got sold-through during the period.
+          <ul style="margin:6px 0 0 18px;padding:0;color:var(--ink-soft);font-size:12.5px;line-height:1.55">
+            <li><b>≥ 4 · HEALTHY</b> — stock turned 4+ times, good cash conversion</li>
+            <li><b>1–4 · ACCEPTABLE</b> — turned at least once, FMCG norm</li>
+            <li><b>0.1–1 · SLOW</b> — only 10–100% of stock moved · review assortment</li>
+            <li><b>&lt; 0.1 · STAGNANT</b> — e.g. <b>0.01 means only 1% of stock sold</b>, 99% sitting idle → dead inventory, clear via discount or rebalance to higher-demand WH</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Per-warehouse expiry risk -->
+      <div class="card" style="margin-top:14px"><h4>⏳ Expiry Risk · per Warehouse (clearance vs expiry)</h4>
+        <div class="micro" style="margin-bottom:8px">For each SKU at each warehouse, we compute <code>days_of_stock = inventory ÷ daily sales rate (from that warehouse)</code> and compare to <code>days_to_expiry</code>. <b>Gap &lt; 90 days = HIGH risk</b> (stock will hit expiry within 3 months), 90–180 = MEDIUM, &gt; 180 = LOW.</div>
+        <div class="chart-wrap"><canvas id="ch-sup-expiry-wh"></canvas></div>
+        <table class="data" style="margin-top:10px"><thead><tr><th>Warehouse</th><th class="num">SKU rows</th><th class="num">% High</th><th class="num">% Medium</th><th class="num">% Low</th><th>Action</th></tr></thead><tbody>
+        ${whExpiry.length ? whExpiry.map(w=>`<tr>
+          <td><b>${w.Warehouse}</b></td>
+          <td class="num">${w.Total}</td>
+          <td class="num"><span class="tag red">${w.HighPct.toFixed(0)}%</span></td>
+          <td class="num"><span class="tag amber">${w.MediumPct.toFixed(0)}%</span></td>
+          <td class="num"><span class="tag green">${w.LowPct.toFixed(0)}%</span></td>
+          <td>${w.HighPct>30?'<span class="tag red">URGENT — redistribute or discount-clear</span>':w.HighPct>10?'<span class="tag amber">Pilot promo · review assortment</span>':'<span class="tag green">Monitor</span>'}</td>
+        </tr>`).join('') : '<tr><td colspan="6" class="micro">No inventory + expiry data to compute warehouse-level expiry risk.</td></tr>'}
+        </tbody></table>
+      </div>
+
+      <!-- Replenishment priority -->
+      <div class="card" style="margin-top:14px"><h4>🚚 Replenishment &amp; Scale-up Priority</h4>
+        ${replenish.length ? `
+        <div class="micro" style="margin-bottom:8px">Warehouses ranked by combined urgency: low efficiency score + high stockout rate = top of the list. Action is to replenish, expand DC capacity, or add a secondary vendor in that region.</div>
+        <table class="data"><thead><tr><th>Rank</th><th>Warehouse</th><th class="num">Eff. Score</th><th class="num">Stockout %</th><th class="num">Avg Ship</th><th>Recommended Action</th></tr></thead><tbody>
+        ${replenish.slice(0,8).map((w,i)=>`<tr>
+          <td>${i+1}</td>
+          <td><b>${w.key}</b></td>
+          <td class="num"><b>${w.EffScore}</b>/100</td>
+          <td class="num">${w.StockoutRate.toFixed(1)}%</td>
+          <td class="num">${w.AvgShip==null?'—':w.AvgShip.toFixed(1)+'d'}</td>
+          <td>${w.EffScore<60 && w.StockoutRate>15 ? '<b>Scale capacity</b> + onboard backup vendor + audit logistics partner' :
+               w.StockoutRate>15 ? '<b>Increase safety stock</b> + tighten replenishment cadence (weekly → daily)' :
+               w.EffScore<60 ? '<b>Audit ship lanes</b> + renegotiate logistics SLA · benchmark vs peer WH' :
+               'Routine optimization'}</td>
+        </tr>`).join('')}
+        </tbody></table>
+        <div class="insight bad" style="margin-top:10px">🤖 <b>Action:</b> Replenish and scale capacity at warehouses with low efficiency AND high stockouts. Onboard alternate vendors in those regions to reduce single-vendor dependency.</div>
+        ` : '<div class="insight good">All warehouses are operating at acceptable efficiency. Maintain current cadence.</div>'}
+      </div>
+
+      <!-- Vendor dependency -->
+      <div class="card" style="margin-top:14px"><h4>🏭 Vendor Dependency</h4>
+        <div class="chart-wrap"><canvas id="ch-sup-vendor"></canvas></div>
+        <div class="insight ${byVen.some(v=>v.Dep==='High')?'bad':'good'}" style="margin-top:8px">🤖 ${byVen.filter(v=>v.Dep==='High').length} vendor(s) carry &gt; equal-share concentration (&gt; ${(100/byVen.length).toFixed(1)}%). Recommend onboarding alternates in regions where warehouse efficiency is also low — concentration risk compounds with logistics risk.</div>
+      </div>
+    </div>`;
+
+  // ===== Charts =====
+  chart('ch-sup-wh',{
+    type:'bar',
+    data:{labels:byWh.map(w=>w.key),datasets:[
+      {label:'Efficiency Score', data:byWh.map(w=>w.EffScore), backgroundColor:byWh.map(w=>w.EffTier==='High'?'#1f7a4c':w.EffTier==='Medium'?'#b87900':'#b3261e'), yAxisID:'y'},
+      {label:'Stockout %',       data:byWh.map(w=>w.StockoutRate), type:'line', borderColor:'#0c0d10', backgroundColor:'#0c0d10', tension:.3, yAxisID:'y1'},
+      {label:'Avg Ship Days',    data:byWh.map(w=>w.AvgShip||0),   type:'line', borderColor:'#c8102e', backgroundColor:'#c8102e', tension:.3, yAxisID:'y1', borderDash:[6,4]},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'Inter',size:11},boxWidth:10,boxHeight:10}}},
+      scales:{
+        y:{position:'left',beginAtZero:true,max:100,title:{display:true,text:'Eff. Score / 100'}},
+        y1:{position:'right',beginAtZero:true,grid:{drawOnChartArea:false},title:{display:true,text:'Stockout % / Ship Days'}},
+        x:{grid:{display:false}}
+      }
+    }
+  });
+
+  chart('ch-sup-expiry-wh',{
+    type:'bar',
+    data:{
+      labels:whExpiry.map(w=>w.Warehouse),
+      datasets:[
+        {label:'High Risk',  data:whExpiry.map(w=>w.HighPct),  backgroundColor:'#b3261e', stack:'e'},
+        {label:'Medium Risk',data:whExpiry.map(w=>w.MediumPct),backgroundColor:'#b87900', stack:'e'},
+        {label:'Low Risk',   data:whExpiry.map(w=>w.LowPct),   backgroundColor:'#1f7a4c', stack:'e'},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      indexAxis:'y',
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{font:{family:'Inter',size:11},boxWidth:10,boxHeight:10}},
+        tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${c.parsed.x.toFixed(1)}%`}}
+      },
+      scales:{
+        x:{stacked:true,beginAtZero:true,max:100,ticks:{callback:v=>v+'%'},title:{display:true,text:'% of SKU rows in warehouse'}},
+        y:{stacked:true,grid:{display:false}}
+      }
+    }
+  });
+
+  chart('ch-sup-vendor',{
+    type:'bar',
+    data:{labels:byVen.slice(0,10).map(v=>v.key),datasets:[
+      {label:'Revenue Share %',data:byVen.slice(0,10).map(v=>v.Share),
+       backgroundColor:byVen.slice(0,10).map(v=>v.Dep==='High'?'#b3261e':v.Dep==='Medium'?'#b87900':'#1f7a4c')}
+    ]},
+    options:chartOpts()
+  });
+}
+
+/* ===================================================================== */
+/* ===== MODULE 6 — PRICING ============================================= */
+/* ===================================================================== */
+function renderPricing(){
+  const rs = STATE.filtered;
+  const pane = document.getElementById('pane-pricing');
+
+  if(!STATE.pricing) STATE.pricing = {selectedSku:null, newLaunch:false, launchMonths:6, launchCategory:''};
+  const P = STATE.pricing;
+
+  // ===== SKU selector =====
+  const skuAgg = aggByGroup(rs,'Product',['Revenue','Units']);
+  if(!P.selectedSku || !skuAgg.find(s=>s.key===P.selectedSku)) P.selectedSku = skuAgg[0]?.key;
+  const topSku = P.selectedSku;
+  const skuRows = rs.filter(r=>r.Product===topSku);
+  const basePrice = (skuRows.find(r=>r['Base Price']!=null)||{})['Base Price'];
+
+  // ===== Price elasticity: revenue = units × (base price × (1 − discount%)) =====
+  // Group by discount % bucket, compute total revenue + units at each
+  const byDisc = {};
+  skuRows.forEach(r=>{
+    const d = Math.round((r.Discount||0)/5)*5;
+    if(!byDisc[d]) byDisc[d]={units:0,rev:0,priceSum:0,n:0};
+    byDisc[d].units += r.Units;
+    byDisc[d].rev   += r.Revenue;
+    if(r['Base Price']!=null){
+      byDisc[d].priceSum += r['Base Price']*(1-d/100);
+      byDisc[d].n += 1;
+    }
+  });
+  const elasticity = Object.keys(byDisc).map(k=>({
+    discount:+k, units:byDisc[k].units, revenue:byDisc[k].rev,
+    avgPrice: byDisc[k].n>0?byDisc[k].priceSum/byDisc[k].n:null,
+  })).sort((a,b)=>a.discount-b.discount);
+
+  // Optimal: MINIMUM discount with MAXIMUM revenue (within 5% tolerance of peak)
+  const maxRev = elasticity.length ? Math.max(...elasticity.map(e=>e.revenue)) : 0;
+  const tolerance = maxRev * 0.95;
+  const peakCandidates = elasticity.filter(e=>e.revenue >= tolerance);
+  const opt = peakCandidates.length ? peakCandidates.reduce((a,b)=>a.discount<b.discount?a:b) : null;
+  // Elasticity band: discount range where revenue stays within 90% of peak
+  const band90 = elasticity.filter(e=>e.revenue >= maxRev*0.9);
+  const elasticBand = band90.length>=2 ? {
+    low: Math.min(...band90.map(c=>c.discount)),
+    high: Math.max(...band90.map(c=>c.discount)),
+    priceLow: opt && basePrice ? basePrice*(1-Math.max(...band90.map(c=>c.discount))/100) : null,
+    priceHigh: opt && basePrice ? basePrice*(1-Math.min(...band90.map(c=>c.discount))/100) : null,
+  } : null;
+
+  // ===== Inventory pressure: per row, then aggregate by category =====
+  const today = new Date();
+  const skuDailyRate = {};
+  Object.entries(groupBy(rs.filter(r=>r.Date), r=>r.Product)).forEach(([sku, rows])=>{
+    const totalUnits = sumBy(rows, r=>r.Units);
+    const dates = rows.map(r=>r.Date).sort((a,b)=>a-b);
+    const spanDays = dates.length>1 ? Math.max(1,(dates[dates.length-1]-dates[0])/(1000*60*60*24)) : 30;
+    skuDailyRate[sku] = totalUnits / spanDays;
+  });
+  const pressureRows = [];
+  rs.forEach(r=>{
+    if(!r.Expiry || r.Inventory==null) return;
+    const rate = Math.max(skuDailyRate[r.Product] || 0.01, 0.01);
+    const daysOfStock = r.Inventory / rate;
+    const daysToExpiry = (r.Expiry - today)/(1000*60*60*24);
+    const gapDays = daysToExpiry - daysOfStock;     // positive = stock clears safely before expiry
+    let pressure;
+    if(gapDays < 90) pressure = 'High';        // 1-3 month buffer or worse
+    else if(gapDays < 180) pressure = 'Medium'; // 3-6 month buffer
+    else pressure = 'Low';                      // > 6 month buffer
+    pressureRows.push({
+      Category:r.Category, Product:r.Product,
+      DaysOfStock:daysOfStock, DaysToExpiry:daysToExpiry, GapDays:gapDays, Pressure:pressure,
+    });
+  });
+  // Per-category aggregation
+  const catPressure = Object.entries(groupBy(pressureRows, r=>r.Category)).map(([cat, rows])=>{
+    const n = rows.length || 1;
+    const hi = rows.filter(r=>r.Pressure==='High').length;
+    const md = rows.filter(r=>r.Pressure==='Medium').length;
+    const lo = rows.filter(r=>r.Pressure==='Low').length;
+    return {
+      Category:cat, Total:rows.length,
+      High:hi, Medium:md, Low:lo,
+      HighPct:(hi/n)*100, MediumPct:(md/n)*100, LowPct:(lo/n)*100,
+    };
+  }).sort((a,b)=>b.HighPct-a.HighPct);
+
+  // Dominant pressure per SKU (for the per-customer engine)
+  const skuTopPressure = {};
+  Object.entries(groupBy(pressureRows, r=>r.Product)).forEach(([sku, rows])=>{
+    const counts = {High:0, Medium:0, Low:0};
+    rows.forEach(r=>counts[r.Pressure]++);
+    skuTopPressure[sku] = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0][0];
+  });
+
+  // ===== Personalized discount per customer (real numbers) =====
+  const {p1, p2} = periodSplit(rs);
+  const cMap = {};
+  const seed = (c, region)=>{ if(!cMap[c]) cMap[c]={Region:region,p1:{rev:0,n:0},p2:{rev:0,n:0}}; };
+  p1.forEach(r=>{ seed(r.Customer,r.Region); cMap[r.Customer].p1.rev += r.Revenue; cMap[r.Customer].p1.n += 1; });
+  p2.forEach(r=>{ seed(r.Customer,r.Region); cMap[r.Customer].p2.rev += r.Revenue; cMap[r.Customer].p2.n += 1; });
+
+  const custDisc = Object.entries(cMap).map(([c, d])=>{
+    const clvDelta  = d.p1.rev>0 ? ((d.p2.rev-d.p1.rev)/d.p1.rev)*100 : (d.p2.rev>0?100:0);
+    const aovP1 = d.p1.n>0 ? d.p1.rev/d.p1.n : 0;
+    const aovP2 = d.p2.n>0 ? d.p2.rev/d.p2.n : 0;
+    const aovDelta  = aovP1>0 ? ((aovP2-aovP1)/aovP1)*100 : (aovP2>0?100:0);
+    const freqDelta = d.p1.n>0 ? ((d.p2.n-d.p1.n)/d.p1.n)*100 : (d.p2.n>0?100:0);
+
+    let disc = 5;
+    const reasons = [];
+    if(clvDelta < -10)      { disc += 10; reasons.push('CLV falling'); }
+    else if(clvDelta > 10)  { disc -= 3;  reasons.push('CLV growing'); }
+    if(aovDelta > 10)       { disc += 5;  reasons.push('AOV rising — push'); }
+    else if(aovDelta < -10) { disc += 8;  reasons.push('AOV falling'); }
+    if(freqDelta < -10)     { disc += 10; reasons.push('Freq dropping — win-back'); }
+    else if(freqDelta > 10) { disc -= 3;  reasons.push('Freq growing'); }
+
+    // Top SKU + pressure
+    const custRows = rs.filter(r=>r.Customer===c);
+    const skuCnt = {};
+    custRows.forEach(r=>{ skuCnt[r.Product] = (skuCnt[r.Product]||0)+1; });
+    const topSkuC = Object.entries(skuCnt).sort((a,b)=>b[1]-a[1])[0]?.[0];
+    const pressC = topSkuC ? skuTopPressure[topSkuC] : null;
+    if(pressC==='High')    { disc += 10; reasons.push('High inv. pressure'); }
+    else if(pressC==='Medium'){ disc += 5; reasons.push('Med pressure'); }
+
+    // New launch
+    if(P.newLaunch && P.launchMonths>=1 && P.launchMonths<=3){
+      const catOfTop = topSkuC ? (custRows.find(r=>r.Product===topSkuC)?.Category) : null;
+      if(!P.launchCategory || P.launchCategory===catOfTop){
+        disc += 15; reasons.push(`Clearance · launch in ${P.launchMonths}mo`);
+      }
+    }
+
+    disc = Math.max(0, Math.min(40, disc));
+    return {
+      Customer:c, Region:d.Region, TopSku:topSkuC||'—', TopSkuPressure:pressC||'—',
+      CLVDelta:clvDelta, AOVDelta:aovDelta, FreqDelta:freqDelta,
+      Discount:disc, Reasons:reasons.join(' · '), Revenue:d.p1.rev+d.p2.rev,
+    };
+  }).filter(c=>c.Revenue>0).sort((a,b)=>b.Revenue-a.Revenue).slice(0,15);
+
+  const skuOptions = skuAgg.map(s=>`<option value="${escapeAttr(s.key)}" ${s.key===topSku?'selected':''}>${truncate(s.key,30)}</option>`).join('');
+
+  pane.innerHTML = `
+    <div class="section">
+      <h3>6 · Dynamic Pricing &amp; Discount Engine</h3>
+      <div class="sub-h">Elasticity · personalized discounting · inventory pressure · new-launch clearance</div>
+
+      <!-- New launch input -->
+      <div class="card" style="margin-bottom:14px;background:#fbf8f1;border-left:4px solid var(--brand)">
+        <h4>🚀 New Launch Planning Input</h4>
+        <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-top:8px;font-size:13px">
+          <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="pricNewLaunch" ${P.newLaunch?'checked':''} onchange="STATE.pricing.newLaunch=this.checked"/> Planning a new product launch?</label>
+          <div>In how many months: <input type="number" min="1" max="24" value="${P.launchMonths}" oninput="STATE.pricing.launchMonths=parseInt(this.value)||6" style="width:64px;padding:5px 7px;border:1px solid var(--line-strong);border-radius:3px"/></div>
+          <div>Replacing category: <select onchange="STATE.pricing.launchCategory=this.value" style="padding:5px 8px;border:1px solid var(--line-strong);border-radius:3px">
+            <option value="">— Any —</option>
+            ${uniq(rs.map(r=>r.Category)).filter(c=>c&&c!=='—').map(c=>`<option ${c===P.launchCategory?'selected':''}>${c}</option>`).join('')}
+          </select></div>
+          <button class="pill-btn" style="margin:0;padding:8px 16px;font-size:12px;width:auto" onclick="renderPricing()">↻ Recompute</button>
+        </div>
+        <div class="micro" style="margin-top:8px">If launch is 1–3 months out, AI applies <b>+15pp clearance discount</b> on legacy SKUs to clear stock before the launch.</div>
+      </div>
+
+      <!-- Row 1: Elasticity + Signal Rules -->
+      <div class="grid-eq">
+        <div class="card">
+          <h4>Price Elasticity · <select onchange="STATE.pricing.selectedSku=this.value; renderPricing()" style="padding:4px 8px;font-size:13px;font-family:Inter;border:1px solid var(--line-strong);border-radius:3px;font-weight:600;color:var(--ink);background:#fff">${skuOptions}</select></h4>
+          <div class="chart-wrap"><canvas id="ch-price-elast"></canvas></div>
+          ${opt ? `
+            <div class="insight good" style="margin-top:8px">🤖 <b>Optimal discount = ${opt.discount}%</b> · max revenue <b>${fmtMoney(opt.revenue)}</b> at <b>${fmt(opt.units)} units</b> sold${opt.avgPrice?` · avg price ${fmtMoney(opt.avgPrice)}`:''}.</div>
+            ${elasticBand && elasticBand.low!==elasticBand.high ? `
+            <div class="insight" style="margin-top:6px">📐 <b>Elasticity band: ${elasticBand.low}%–${elasticBand.high}% discount</b>${elasticBand.priceLow&&elasticBand.priceHigh?` (price range <b>${fmtMoney(elasticBand.priceLow)} – ${fmtMoney(elasticBand.priceHigh)}</b>)`:''} · revenue stays within 90% of peak in this band. Outside it, you either leave volume on the table or cannibalise margin.</div>
+            ` : ''}
+            <div class="micro" style="margin-top:6px">Formula · <code>revenue at discount d = units sold × (base price × (1 − d))</code>. The chart bins observed transactions by discount %, computes total revenue at each, and picks the <b>minimum discount</b> that delivers the <b>maximum revenue</b>.</div>
+          ` : '<div class="micro">No discount variability detected for this SKU.</div>'}
+        </div>
+
+        <div class="card">
+          <h4>AI Personalized Discount · Signal Rules</h4>
+          <table class="data"><thead><tr><th>Signal</th><th>If…</th><th>Then</th><th class="num">Δ Discount</th></tr></thead><tbody>
+            <tr><td rowspan="2"><b>Loyalty (CLV)</b></td><td>CLV growing &gt; 10%</td><td><span class="tag green">Less discount</span></td><td class="num">−3 pp</td></tr>
+            <tr><td>CLV falling &gt; 10%</td><td><span class="tag red">More discount</span></td><td class="num">+10 pp</td></tr>
+            <tr><td rowspan="2"><b>Order value (AOV)</b></td><td>AOV rising</td><td><span class="tag amber">Push AOV further</span></td><td class="num">+5 pp</td></tr>
+            <tr><td>AOV falling</td><td><span class="tag red">Promo to lift basket</span></td><td class="num">+8 pp</td></tr>
+            <tr><td rowspan="2"><b>Purchase frequency</b></td><td>Frequency rising</td><td><span class="tag green">Less discount</span></td><td class="num">−3 pp</td></tr>
+            <tr><td>Frequency falling</td><td><span class="tag red">Win-back</span></td><td class="num">+10 pp</td></tr>
+            <tr><td rowspan="2"><b>Inventory pressure</b></td><td>High (clear in 1–3 mo of expiry)</td><td><span class="tag red">Aggressive</span></td><td class="num">+10 pp</td></tr>
+            <tr><td>Medium (3–6 mo)</td><td><span class="tag amber">Moderate</span></td><td class="num">+5 pp</td></tr>
+            <tr><td><b>New launch</b></td><td>Launch in 1–3 months</td><td><span class="tag red">Clearance</span></td><td class="num">+15 pp</td></tr>
+          </tbody></table>
+          <div class="micro" style="margin-top:8px">Base = 5%. Components sum and clamp to 0–40%. Applied at customer level using their real CLV / AOV / Frequency deltas (table below).</div>
+        </div>
+      </div>
+
+      <!-- Inventory pressure per category -->
+      <div class="card" style="margin-top:14px"><h4>📦 Inventory Pressure Distribution · per Category (real %)</h4>
+        <div class="chart-wrap tall"><canvas id="ch-price-pressure-cat"></canvas></div>
+        <table class="data" style="margin-top:10px"><thead><tr><th>Category</th><th class="num">SKU rows</th><th class="num">% High</th><th class="num">% Medium</th><th class="num">% Low</th><th>Recommended action</th></tr></thead><tbody>
+        ${catPressure.length ? catPressure.map(c=>`<tr>
+          <td><b>${c.Category}</b></td>
+          <td class="num">${c.Total}</td>
+          <td class="num"><span class="tag red">${c.HighPct.toFixed(0)}%</span></td>
+          <td class="num"><span class="tag amber">${c.MediumPct.toFixed(0)}%</span></td>
+          <td class="num"><span class="tag green">${c.LowPct.toFixed(0)}%</span></td>
+          <td>${c.HighPct>30?'<span class="tag red">URGENT — discount &amp; clear</span>':c.HighPct>10?'<span class="tag amber">Pilot promo</span>':'<span class="tag green">Hold price</span>'}</td>
+        </tr>`).join('') : '<tr><td colspan="6" class="micro">No inventory + expiry data available to compute pressure.</td></tr>'}
+        </tbody></table>
+        <div class="insight" style="margin-top:8px">📊 <b>Pressure formula:</b> <code>gap = days_to_expiry − (inventory ÷ daily sales rate)</code>.
+          &nbsp;<span class="tag red">High</span> gap &lt; 90 days (stock will hit expiry within 3 months) ·
+          &nbsp;<span class="tag amber">Medium</span> 90–180 days ·
+          &nbsp;<span class="tag green">Low</span> &gt; 180 days.
+        </div>
+      </div>
+
+      <!-- AI personalized discount table -->
+      <div class="card" style="margin-top:14px"><h4>🎯 AI Personalized Discount · top customers (real numbers)</h4>
+        <table class="data"><thead><tr><th>Customer</th><th>Region</th><th>Top SKU</th><th>Pressure</th><th class="num">CLV Δ</th><th class="num">AOV Δ</th><th class="num">Freq Δ</th><th class="num">Final Discount</th><th>Reasoning</th></tr></thead><tbody>
+        ${custDisc.length ? custDisc.map(c=>`<tr>
+          <td><b>${c.Customer}</b></td>
+          <td>${c.Region}</td>
+          <td>${truncate(c.TopSku,22)}</td>
+          <td><span class="tag ${c.TopSkuPressure==='High'?'red':c.TopSkuPressure==='Medium'?'amber':'green'}">${c.TopSkuPressure}</span></td>
+          <td class="num"><span class="tag ${c.CLVDelta>=10?'green':c.CLVDelta<=-10?'red':'grey'}">${fmtPct(c.CLVDelta)}</span></td>
+          <td class="num"><span class="tag ${c.AOVDelta>=10?'amber':c.AOVDelta<=-10?'red':'grey'}">${fmtPct(c.AOVDelta)}</span></td>
+          <td class="num"><span class="tag ${c.FreqDelta>=10?'green':c.FreqDelta<=-10?'red':'grey'}">${fmtPct(c.FreqDelta)}</span></td>
+          <td class="num"><b style="font-size:15px">${c.Discount.toFixed(0)}%</b></td>
+          <td style="font-size:11.5px;color:var(--muted)">${c.Reasons || 'baseline'}</td>
+        </tr>`).join('') : '<tr><td colspan="9" class="micro">No customers with multi-period activity.</td></tr>'}
+        </tbody></table>
+        <div class="insight good" style="margin-top:10px">🤖 <b>Read the table:</b> each customer's recommended discount = base 5% + signal-driven components. Falling CLV + falling frequency + high-pressure top SKU + imminent launch = the largest discount (win-back + clearance stack). Growing CLV + growing frequency on a low-pressure SKU = the smallest discount (don't erode premium-customer margin).</div>
+      </div>
+    </div>`;
+
+  // ===== Charts =====
+  chart('ch-price-elast',{
+    type:'bar',
+    data:{labels:elasticity.map(e=>e.discount+'%'),datasets:[
+      {label:'Revenue',data:elasticity.map(e=>e.revenue),backgroundColor:elasticity.map(e=>opt&&e.discount===opt.discount?'#1f7a4c':'#c8102e'),yAxisID:'y'},
+      {label:'Units',data:elasticity.map(e=>e.units),type:'line',borderColor:'#0c0d10',backgroundColor:'#0c0d10',tension:.3,yAxisID:'y1'},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'Inter',size:11},boxWidth:10,boxHeight:10}},
+        tooltip:{callbacks:{afterLabel:(c)=>c.dataset.label==='Revenue' && elasticity[c.dataIndex].avgPrice ? `Avg price: ${fmtMoney(elasticity[c.dataIndex].avgPrice)}` : ''}}},
+      scales:{
+        y:{position:'left',beginAtZero:true,grid:{color:'#f0efe9'},title:{display:true,text:'Revenue'}},
+        y1:{position:'right',beginAtZero:true,grid:{drawOnChartArea:false},title:{display:true,text:'Units'}},
+        x:{grid:{display:false},title:{display:true,text:'Discount %'}}
+      }
+    }
+  });
+
+  chart('ch-price-pressure-cat',{
+    type:'bar',
+    data:{
+      labels:catPressure.map(c=>c.Category),
+      datasets:[
+        {label:'High Pressure',  data:catPressure.map(c=>c.HighPct),  backgroundColor:'#b3261e',stack:'s'},
+        {label:'Medium Pressure',data:catPressure.map(c=>c.MediumPct),backgroundColor:'#b87900',stack:'s'},
+        {label:'Low Pressure',   data:catPressure.map(c=>c.LowPct),   backgroundColor:'#1f7a4c',stack:'s'},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      indexAxis:'y',
+      plugins:{
+        legend:{display:true,position:'bottom',labels:{font:{family:'Inter',size:11},boxWidth:10,boxHeight:10}},
+        tooltip:{callbacks:{label:(c)=>`${c.dataset.label}: ${c.parsed.x.toFixed(1)}%`}}
+      },
+      scales:{
+        x:{stacked:true,beginAtZero:true,max:100,ticks:{callback:v=>v+'%'},title:{display:true,text:'% of SKU rows in category'}},
+        y:{stacked:true,grid:{display:false}}
+      }
+    }
+  });
+}
+
+/* ===================================================================== */
+/* ===== MODULE 7 — SHELF & PACKAGING ==================================== */
+/* ===================================================================== */
+function renderShelf(){
+  const rs = STATE.filtered;
+  const pane = document.getElementById('pane-shelf');
+
+  // ===== Retailer visibility (indirect/retail channels only) =====
+  const retail = rs.filter(r=>r['Channel Type']==='Indirect' || /retail|store|distributor/i.test(r.Channel));
+  const byCust = groupBy(retail, r=>r.Customer);
+  const visibility = Object.entries(byCust).map(([k,rows])=>{
+    const dates = rows.map(r=>r.Date).filter(Boolean).sort((a,b)=>a-b);
+    const gaps = [];
+    for(let i=1;i<dates.length;i++) gaps.push((dates[i]-dates[i-1])/(1000*60*60*24));
+    return {
+      Retailer:k,
+      Region: rows[0].Region,
+      Orders: rows.length,
+      AvgGapDays: gaps.length?avg(gaps):null,
+      Revenue: sumBy(rows,r=>r.Revenue),
+    };
+  }).sort((a,b)=>b.Orders-a.Orders).slice(0,12);
+
+  visibility.forEach(v=>{
+    if(v.Orders>=8 && v.AvgGapDays!=null && v.AvgGapDays<30){
+      v.Tier='PLATINUM';
+      v.Reward='5–8% volume rebate · Net 90 payment · Exclusive new-SKU first-look · Co-op marketing budget · Free chillers / branded fixtures · Priority fulfillment SLA';
+      v.Color='green';
+    } else if(v.Orders>=5){
+      v.Tier='GOLD';
+      v.Reward='3–5% volume rebate · Net 60 payment · Quarterly business review · Joint promo planning · Branded POS support';
+      v.Color='blue';
+    } else if(v.Orders>=3){
+      v.Tier='SILVER';
+      v.Reward='2% volume rebate · Net 45 payment · Listing & launch support · Annual KPI review';
+      v.Color='amber';
+    } else {
+      v.Tier='MONITOR';
+      v.Reward='Standard Net 30 terms · Performance review at 6 months · Onboarding pilot';
+      v.Color='grey';
+    }
+  });
+
+  // ===== Packaging theme stats =====
+  const themeAgg = aggByGroup(rs,'Packaging',['Revenue','Units']);
+  themeAgg.forEach(t=>{ t.AvgRev = t.Revenue/Math.max(t.Count,1); });
+  const bestTheme = [...themeAgg].sort((a,b)=>b.AvgRev-a.AvgRev)[0];
+
+  // ===== SKU-level shelf placement AI =====
+  const bySku = aggByGroup(rs,'Product',['Revenue','Profit','Units']);
+  bySku.forEach(s=>{
+    s.Margin = s.Revenue>0 ? (s.Profit/s.Revenue)*100 : 0;
+    s.AvgPrice = s.Units>0 ? s.Revenue/s.Units : 0;
+    const ref = rs.find(r=>r.Product===s.key);
+    s.Category = ref?ref.Category:'—';
+  });
+  const shelfAdvice = bySku.slice(0,12).map(s=>{
+    let zone, reason, position, neighbor;
+    if(s.Margin>=15){
+      zone='Eye-level (4–5 ft)';
+      reason=`High-margin SKU (${s.Margin.toFixed(1)}%) — claim the prime eye-line zone`;
+    } else if(s.Margin>=8){
+      zone='Waist-level (3–4 ft)';
+      reason=`Solid margin (${s.Margin.toFixed(1)}%) — accessible shopping zone`;
+    } else {
+      zone='Lower-shelf (< 3 ft)';
+      reason=`Lower margin (${s.Margin.toFixed(1)}%) — preserve prime real estate for winners`;
+    }
+    const c = s.Category.toLowerCase();
+    if(c.includes('ice cream'))           { position='End-cap + secondary near checkout (freezer)'; neighbor='Frozen desserts · cones · chocolate sauce'; }
+    else if(c.includes('snack'))          { position='End-cap + impulse zone near checkout';        neighbor='Protein bars · vitamin water · gym aisle'; }
+    else if(c.includes('tea')||c.includes('coffee')){ position='Breakfast aisle + secondary near bakery'; neighbor='Biscuits · cereal · sugar substitutes'; }
+    else if(c.includes('skin')||c.includes('hair')) { position='Premium beauty aisle + island display'; neighbor='Cotton pads · face masks · gift sets'; }
+    else if(c.includes('deodor'))         { position='Personal-care aisle · mid-shelf';            neighbor='Body wash · razors · grooming kits'; }
+    else if(c.includes('beverage'))       { position='Chilled cooler + impulse near checkout';     neighbor='Chips · munchies · ready-snacks'; }
+    else                                  { position='Brand block · mid-aisle';                    neighbor='Adjacent same-occasion items'; }
+    return {sku:s.key, category:s.Category, margin:s.Margin, zone, reason, position, neighbor};
+  });
+
+  // ===== Brand spotlight: top-revenue SKU =====
+  const spotlight = bySku[0];
+  const spotlightAdvice = spotlight ? shelfAdvice.find(a=>a.sku===spotlight.key) : null;
+
+  // ===== Co-branding / partnership ideas (per category) =====
+  const COBRAND = {
+    'Ice Cream':       { audience:'Kids · families',         characters:['Spider-Man','Marvel Avengers','Frozen (Elsa/Anna)','Pokémon','Doraemon','Chhota Bheem','Peppa Pig'], movies:['Marvel/Disney summer releases','Pixar new launches','Bollywood kids titles'], events:['Summer holidays','Back-to-school','Birthday season','Diwali fest packs'], angle:'Character cut-out cups · collectible spoons · AR scan-to-unlock games · sticker-pack lids' },
+    'Healthy Snacks':  { audience:'Fitness · aspirational',  characters:['Iron Man (energy)','Virat Kohli','Mary Kom','Hima Das','Olympic athletes','Yoga icons'], movies:['Sports biopics (Dhoni, Mary Kom, 83)','Health documentaries'], events:['IPL','TCS Mumbai Marathon','Wellness Week','National Fitness Day'], angle:'Athlete-endorsed pack · calorie streak gamification · QR to workout video' },
+    'Tea / Coffee':    { audience:'Mindful · craft',         characters:['Indie musicians','Tarsem Singh / Anurag Kashyap','Murakami illustrations','Coffee origin farmers'], movies:['MAMI / Sundance partnerships','Café-culture series (Friends re-runs, Schitt\'s Creek)'], events:['Monsoon "chai season"','Winter premium hot drinks','International Coffee Day (Oct 1)'], angle:'Artist-illustrated limited tins · seasonal single-origin drops · "café-at-home" ritual kits' },
+    'Skin / Hair Care':{ audience:'Aspiration · glow',       characters:['Deepika Padukone','Alia Bhatt','Janhvi Kapoor','K-pop idols','Influencer dermatologists'], movies:['Romcom releases (YJHD-style)','Award seasons (Filmfare, Vogue Beauty)'], events:['Wedding season (Nov–Feb)','Karva Chauth','Valentine\'s Day','Diwali gifting'], angle:'Celebrity-signed limited editions · festive metallic gift boxes · "Get the look" pack QR' },
+    'Deodorants':      { audience:'Confidence · sport',      characters:['Marvel/DC heroes','Cricket teams (CSK, MI, RCB)','Man Utd / Real Madrid','F1 drivers'], movies:['Action blockbusters (Pathaan, Mission Impossible)','Sports films'], events:['IPL','Football season','Summer college fests','New Year party season'], angle:'Hero-power callouts ("Iron Man strength") · team-coloured cans · scan-to-win match tickets' },
+    'Beverages':       { audience:'Social · youth',          characters:['CSK / MI / RCB','NH7 Weekender','Sunburn','OTT shows (Stranger Things, Wednesday)','BTS / Coldplay'], movies:['Summer blockbusters','Reality TV (Bigg Boss)'], events:['IPL','Holi','Summer','Music festivals','New Year'], angle:'Limited match-day cans · festival packs · AR scan-to-win merch · QR-unlock playlists' },
+    'Other':           { audience:'Mass · regional',         characters:['Regional cinema stars','Festival icons'], movies:['Regional cinema releases (Telugu/Tamil/Marathi)'], events:['Diwali','Holi','Eid','Onam','Pongal','Durga Puja'], angle:'Vernacular pack copy · regional festival limited editions · local-hero artwork' },
+  };
+  const cats = uniq(rs.map(r=>r.Category)).filter(Boolean);
+  const cobrandRows = cats.map(c=>{
+    const d = COBRAND[c] || COBRAND['Other'];
+    return {category:c, ...d};
+  });
+
+  pane.innerHTML = `
+    <div class="section">
+      <h3>7 · Shelf Space &amp; Packaging Intelligence</h3>
+      <div class="sub-h">Visibility rewards · AI shelf placement · brand spotlight · co-branding ideas</div>
+
+      <!-- Row 1: Retailer rewards + packaging dual-axis chart -->
+      <div class="grid-eq">
+        <div class="card"><h4>🏆 Retailer Trade Rewards · B2B incentives by purchase frequency</h4>
+          <div class="micro" style="margin-bottom:8px">When we sell <b>to</b> retailers (Reliance, Blinkit, Zepto, distributors), shelf visibility isn't a reward — it's an <i>outcome</i> we negotiate. The reward is what <b>we give them</b>: rebates, payment terms, exclusivity, fixtures, marketing co-op.</div>
+          <table class="data"><thead><tr><th>Retailer ID</th><th>Region</th><th class="num">Orders</th><th class="num">Avg gap (d)</th><th class="num">Revenue</th><th>Tier</th><th>Trade Reward Package</th></tr></thead><tbody>
+          ${visibility.map(v=>`<tr>
+            <td><b>${v.Retailer}</b></td>
+            <td>${v.Region}</td>
+            <td class="num">${v.Orders}</td>
+            <td class="num">${v.AvgGapDays==null?'—':v.AvgGapDays.toFixed(0)}</td>
+            <td class="num">${fmtMoney(v.Revenue)}</td>
+            <td><span class="tag ${v.Color}">${v.Tier}</span></td>
+            <td style="font-size:11.5px">${v.Reward}</td>
+          </tr>`).join('')}
+          </tbody></table>
+          <div class="insight good" style="margin-top:8px">🤖 <b>Reward formula:</b> PLATINUM retailers (orders ≥ 8, gap &lt; 30d) earn the full incentive stack — <b>volume rebate · extended payment · exclusivity · co-op marketing · free fixtures</b>. In exchange, we negotiate the in-store visibility outcomes (end-caps, facings, planogram lock) you see in the AI Shelf-Placement table below.</div>
+        </div>
+        <div class="card"><h4>Packaging Theme · Revenue Performance</h4>
+          <div class="chart-wrap"><canvas id="ch-shelf-pack"></canvas></div>
+          <div class="micro">Dual-axis: red bars = total revenue (left), black bars = avg revenue per transaction (right). Both visible now.</div>
+          <div class="insight" style="margin-top:8px">Best performing theme by avg-per-txn: <b>${bestTheme?bestTheme.key:'—'}</b>. Try A/B with co-branded variant next quarter.</div>
+        </div>
+      </div>
+
+      <!-- Brand spotlight -->
+      ${spotlight && spotlightAdvice ? `
+      <div class="card" style="margin-top:14px;background:linear-gradient(135deg,#fff,#fbf2f3);border-left:4px solid var(--brand)"><h4>⭐ Brand Spotlight · maximize visibility of our hero SKU</h4>
+        <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:18px;margin-top:8px">
+          <div>
+            <div style="font-family:'Playfair Display',Georgia,serif;font-size:24px;font-weight:700;color:var(--ink);line-height:1.1">${spotlight.key}</div>
+            <div class="micro" style="margin-top:4px;color:var(--muted)">${spotlight.Category} · ${fmtMoney(spotlight.Revenue)} revenue · ${spotlight.Margin.toFixed(0)}% margin</div>
+            <div class="insight good" style="margin-top:10px">🤖 This is our #1 revenue SKU. Dedicate a permanent <b>${spotlightAdvice.zone}</b> position in <b>${spotlightAdvice.position}</b>. Negotiate planogram lock-in with PLATINUM/GOLD retailers from the table above.</div>
+          </div>
+          <div>
+            <div class="micro" style="text-transform:uppercase;letter-spacing:.12em;font-weight:700;color:var(--muted);font-size:10.5px">Recommended placement</div>
+            <div style="margin-top:4px"><span class="tag green">${spotlightAdvice.zone}</span></div>
+            <div class="micro" style="margin-top:8px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;color:var(--muted);font-size:10.5px">Cross-merchandise with</div>
+            <div style="margin-top:4px;font-size:13px;color:var(--ink-soft)">${spotlightAdvice.neighbor}</div>
+          </div>
+          <div>
+            <div class="micro" style="text-transform:uppercase;letter-spacing:.12em;font-weight:700;color:var(--muted);font-size:10.5px">Tactics</div>
+            <ul style="margin:6px 0 0 16px;padding:0;color:var(--ink-soft);font-size:12.5px;line-height:1.6">
+              <li>Permanent end-cap at top 20% retailers</li>
+              <li>QR scan-to-content on pack (recipes / rituals / AR)</li>
+              <li>Co-branded limited edition every quarter</li>
+              <li>3rd-party SOS audit monthly to enforce planogram</li>
+            </ul>
+          </div>
+        </div>
+      </div>` : ''}
+
+      <!-- AI shelf placement table -->
+      <div class="card" style="margin-top:14px"><h4>🤖 AI Shelf-Placement Recommendations · per SKU</h4>
+        <table class="data"><thead><tr><th>SKU</th><th>Category</th><th class="num">Margin</th><th>Shelf zone</th><th>Position type</th><th>Cross-merchandise with</th></tr></thead><tbody>
+        ${shelfAdvice.map(a=>`<tr>
+          <td><b>${truncate(a.sku,26)}</b></td>
+          <td>${a.category}</td>
+          <td class="num">${a.margin.toFixed(0)}%</td>
+          <td><span class="tag ${a.margin>=40?'green':a.margin>=20?'amber':'grey'}">${a.zone}</span></td>
+          <td style="font-size:11.5px">${a.position}</td>
+          <td style="font-size:11.5px;color:var(--muted)">${a.neighbor}</td>
+        </tr>`).join('')}
+        </tbody></table>
+        <div class="insight" style="margin-top:10px">💡 <b>Rule of thumb:</b> Margin determines the <b>vertical zone</b> (eye-level &gt; waist &gt; floor). Category determines the <b>aisle &amp; cross-merchandise neighbor</b>. Pair high-margin + impulse adjacency → maximum incremental basket.</div>
+      </div>
+
+      <!-- Co-branding partnership engine -->
+      <div class="card" style="margin-top:14px"><h4>🎬 AI Co-Branding &amp; Theme Partnership Engine</h4>
+        <div class="micro" style="margin-bottom:10px">Movie · book · character · sports · festival partnerships to create limited-edition themed packaging — like <b>Spider-Man toothpaste for kids</b>. Combines category audience with relevant cultural IP.</div>
+        ${cobrandRows.map(r=>`
+          <div style="border:1px solid var(--line);border-radius:4px;padding:14px;margin-bottom:10px;background:#fff">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:10px">
+              <div><b style="font-size:14px">${r.category}</b> <span class="tag blue" style="margin-left:8px">${r.audience}</span></div>
+              <div class="micro" style="color:var(--muted)">Limited-edition partnership ideas</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;font-size:12.5px">
+              <div><div class="micro" style="text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;font-size:10px">Characters / IP</div><div style="margin-top:4px;color:var(--ink-soft)">${r.characters.map(c=>`<div>• ${c}</div>`).join('')}</div></div>
+              <div><div class="micro" style="text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;font-size:10px">Movies / Shows</div><div style="margin-top:4px;color:var(--ink-soft)">${r.movies.map(c=>`<div>• ${c}</div>`).join('')}</div></div>
+              <div><div class="micro" style="text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;font-size:10px">Events / Seasons</div><div style="margin-top:4px;color:var(--ink-soft)">${r.events.map(c=>`<div>• ${c}</div>`).join('')}</div></div>
+              <div><div class="micro" style="text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:700;font-size:10px">Creative angle</div><div style="margin-top:4px;color:var(--ink-soft)"><i>${r.angle}</i></div></div>
+            </div>
+          </div>`).join('')}
+        <div class="insight good" style="margin-top:10px">🤖 <b>Playbook:</b> Run 1 character partnership + 1 festival edition per category per year. Keeps the shelf visually fresh (drives re-discovery), creates social-media moments, and lifts AOV through collector-driven multi-buy.</div>
+      </div>
+    </div>`;
+
+  // Dual-axis chart (revenue left, avg per txn right)
+  chart('ch-shelf-pack',{
+    type:'bar',
+    data:{labels:themeAgg.map(t=>t.key),datasets:[
+      {label:'Total Revenue',data:themeAgg.map(t=>t.Revenue),backgroundColor:'#c8102e',yAxisID:'y'},
+      {label:'Avg per txn',  data:themeAgg.map(t=>t.AvgRev),backgroundColor:'#0c0d10',yAxisID:'y1'},
+    ]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom',labels:{font:{family:'Inter',size:11},boxWidth:10,boxHeight:10}}},
+      scales:{
+        y: {position:'left', beginAtZero:true, grid:{color:'#f0efe9'}, ticks:{font:{family:'Inter',size:11}}, title:{display:true,text:'Total Revenue'}},
+        y1:{position:'right',beginAtZero:true, grid:{drawOnChartArea:false},                                  ticks:{font:{family:'Inter',size:11}}, title:{display:true,text:'Avg per txn'}},
+        x: {grid:{display:false},ticks:{font:{family:'Inter',size:11}}},
+      }
+    }
+  });
+}
+
+/* ===================================================================== */
+/* ===== MODULE 8 — COMPETITION ========================================= */
+/* ===================================================================== */
+function renderCompetition(){
+  const pane = document.getElementById('pane-competition');
+  const rs = STATE.filtered;
+
+  // ===== Our metrics =====
+  const byCat = aggByGroup(rs,'Category',['Revenue','Units']);
+  byCat.forEach(c=>{ c.OurAvgPrice = c.Units>0 ? c.Revenue/c.Units : 0; });
+
+  const bySku = aggByGroup(rs,'Product',['Revenue','Units']);
+  const totalRev = sumBy(rs,r=>r.Revenue);
+  bySku.forEach(s=>{
+    s.OurAvgPrice = s.Units>0 ? s.Revenue/s.Units : 0;
+    s.Share = (s.Revenue/Math.max(totalRev,1))*100;
+    const ref = rs.find(r=>r.Product===s.key);
+    s.Category = ref?ref.Category:'—';
+  });
+
+  // ===== Competitor state (defaults seeded if empty) =====
+  if(!STATE.competitor) STATE.competitor = {marketAvgPrice:{}, regulatory:{}, usp:{}};
+  const C = STATE.competitor;
+  const uspDefaults = {
+    'Tea / Coffee':'Single-origin · barista-grade · 0% additives',
+    'Healthy Snacks':'High protein · clean label · no preservatives',
+    'Ice Cream':'Real fruit · less sugar · India-first flavors',
+    'Skin / Hair Care':'Dermatologist-tested · ayurvedic blend',
+    'Deodorants':'24-hr long lasting · sensitive-skin friendly',
+    'Beverages':'Cold-extracted · low sugar · sustainable pack',
+  };
+  const regDefaults = {
+    'Beverages':'FSSAI front-of-pack warning · sugar-tax review',
+    'Healthy Snacks':'FSSAI HFSS labelling rules',
+    'Skin / Hair Care':'BIS cosmetic claim guidelines',
+    'Ice Cream':'Cold-chain audit norms (FSSAI 2025)',
+    'Tea / Coffee':'Pesticide MRL update (Spices Board)',
+    'Deodorants':'CPCSEA aerosol propellant disclosure',
+  };
+  byCat.forEach(c=>{
+    if(C.marketAvgPrice[c.key]==null){
+      const factor = 0.82 + (hashStr(c.key)%30)/100;   // 0.82 – 1.11
+      C.marketAvgPrice[c.key] = Math.round(c.OurAvgPrice*factor);
+    }
+    if(C.regulatory[c.key]==null) C.regulatory[c.key] = regDefaults[c.key] || '—';
+    if(C.usp[c.key]==null)        C.usp[c.key]        = uspDefaults[c.key] || 'Quality · trust · India-first';
+  });
+
+  byCat.forEach(c=>{
+    const mkt = +C.marketAvgPrice[c.key] || c.OurAvgPrice;
+    c.MarketPrice = mkt;
+    c.GapPct = mkt>0 ? ((c.OurAvgPrice-mkt)/mkt)*100 : 0;
+    c.Position = c.GapPct>15 ? 'PREMIUM' : c.GapPct<-15 ? 'VALUE' : 'PARITY';
+  });
+
+  // ===== Trend slopes (for emerging-trend detection) =====
+  const monthCat = {};
+  rs.forEach(r=>{
+    if(!r.Date) return;
+    const k = r.Date.getFullYear()+'-'+String(r.Date.getMonth()+1).padStart(2,'0');
+    monthCat[k] = monthCat[k] || {};
+    monthCat[k][r.Category] = (monthCat[k][r.Category]||0)+r.Revenue;
+  });
+  const months = Object.keys(monthCat).sort();
+  const cats = byCat.map(c=>c.key);
+  const slopes = {};
+  cats.forEach(c=>{
+    const y = months.map(m=>monthCat[m][c]||0);
+    const n = y.length;
+    if(n<2){ slopes[c]=0; return; }
+    const sx = (n-1)*n/2;
+    const sy = y.reduce((a,b)=>a+b,0);
+    const sxy= y.reduce((a,b,i)=>a+i*b,0);
+    const sxx= Array.from({length:n},(_,i)=>i*i).reduce((a,b)=>a+b,0);
+    const slope = (n*sxy - sx*sy)/Math.max(n*sxx-sx*sx,1);
+    slopes[c] = slope / Math.max(sy/n, 1); // relative
+  });
+  const trendList = cats.map(c=>({cat:c, slope:slopes[c]})).sort((a,b)=>b.slope-a.slope);
+  const emerging  = trendList.filter(t=>t.slope>0.02).slice(0,3);
+  const declining = [...trendList].reverse().filter(t=>t.slope<-0.02).slice(0,3);
+
+  // ===== AI insights =====
+  const gaps = [];
+  const premiumCats = byCat.filter(c=>c.Position==='PREMIUM').map(c=>c.key);
+  const valueCats   = byCat.filter(c=>c.Position==='VALUE').map(c=>c.key);
+  if(premiumCats.length) gaps.push(`<b>Whitespace at the value tier</b> in ${premiumCats.join(', ')} — we sit above market. Launch an entry SKU at 15–20% below current price to defend share.`);
+  if(valueCats.length)   gaps.push(`<b>Whitespace at the premium tier</b> in ${valueCats.join(', ')} — we sit below market. Extend portfolio with a premium variant at +20–30% pricing.`);
+  if(!gaps.length) gaps.push('Our pricing sits within ±15% of market across all categories. Whitespace exists in adjacent categories — see Expansion module.');
+
+  const threats = [];
+  byCat.filter(c=>c.GapPct>20).forEach(c=>threats.push(`<b>${c.key}</b> priced <b>${fmtPct(c.GapPct)}</b> above market — vulnerable to competitor undercutting and private-label entry.`));
+  if(declining.length) threats.push(`<b>${declining.map(t=>t.cat).join(', ')}</b> showing negative trend — competitors may be gaining share. Investigate share-of-shelf and promo intensity.`);
+  byCat.filter(c=>C.regulatory[c.key] && C.regulatory[c.key]!=='—').forEach(c=>{
+    threats.push(`Regulatory watch · <b>${c.key}</b>: ${C.regulatory[c.key]}`);
+  });
+  if(!threats.length) threats.push('No major pricing or regulatory threats flagged. Monitor weekly.');
+
+  pane.innerHTML = `
+    <div class="section">
+      <h3>8 · Competition &amp; Market Intelligence</h3>
+      <div class="sub-h">Pricing gap · share · AOV positioning · regulatory · USP · AI threats &amp; gaps</div>
+
+      <!-- Row 1: pricing gap + share -->
+      <div class="grid-eq">
+        <div class="card"><h4>Our Pricing vs Market · by Category</h4>
+          <div class="chart-wrap"><canvas id="ch-comp-gap"></canvas></div>
+          <table class="data" style="margin-top:8px"><thead><tr><th>Category</th><th class="num">Our ₹/u</th><th class="num">Market ₹/u (edit)</th><th class="num">Gap</th><th>Position</th></tr></thead><tbody>
+          ${byCat.map(c=>`<tr>
+            <td>${c.key}</td>
+            <td class="num">${c.OurAvgPrice.toFixed(0)}</td>
+            <td class="num"><input type="number" data-cat="${c.key}" data-key="marketAvgPrice" value="${c.MarketPrice}" oninput="updateCompetitor(this)" style="width:88px;padding:4px 6px;border:1px solid var(--line-strong);border-radius:3px;text-align:right;font-size:12px"/></td>
+            <td class="num"><span class="tag ${c.GapPct>15?'red':c.GapPct<-15?'amber':'green'}">${fmtPct(c.GapPct)}</span></td>
+            <td><span class="tag ${c.Position==='PREMIUM'?'blue':c.Position==='VALUE'?'amber':'grey'}">${c.Position}</span></td>
+          </tr>`).join('')}
+          </tbody></table>
+        </div>
+        <div class="card"><h4>Our Portfolio Share · by SKU</h4>
+          <div class="chart-wrap"><canvas id="ch-comp-share"></canvas></div>
+          <table class="data" style="margin-top:8px"><thead><tr><th>SKU</th><th class="num">Revenue</th><th class="num">Share %</th></tr></thead><tbody>
+          ${bySku.slice(0,8).map(s=>`<tr><td>${truncate(s.key,28)}</td><td class="num">${fmtMoney(s.Revenue)}</td><td class="num">${s.Share.toFixed(1)}%</td></tr>`).join('')}
+          </tbody></table>
+          <div class="micro">Internal portfolio share. Wire in Nielsen / Kantar feed to compute <b>category share-of-market</b>.</div>
+        </div>
+      </div>
+
+      <!-- Row 2: AOV positioning -->
+      <div class="card" style="margin-top:14px"><h4>📐 AOV Positioning · Our SKU vs Market Average</h4>
+        <table class="data"><thead><tr><th>SKU</th><th>Category</th><th class="num">Our ₹/u</th><th class="num">Market ₹/u</th><th class="num">Premium</th><th>AI Positioning Advice</th></tr></thead><tbody>
+        ${bySku.slice(0,12).map(s=>{
+          const cat = byCat.find(c=>c.key===s.Category);
+          const mkt = cat?cat.MarketPrice:s.OurAvgPrice;
+          const prem = mkt>0?((s.OurAvgPrice-mkt)/mkt)*100:0;
+          let advice='';
+          if(prem>30)      advice = `<b>True premium</b> · stop competing on price. Lead with sensory cues (taste, texture, ritual), craftsmanship story, and aspirational packaging. Distribute via D2C + premium retail (Nature's Basket, FoodHall).`;
+          else if(prem>10) advice = `<b>Above-market</b> · justify the gap with one defensible USP (taste / convenience / ingredient). Reinforce in pack copy and 6-sec creatives. Avoid price promos > 10%.`;
+          else if(prem>-10)advice = `<b>At parity</b> · win on <b>convenience &amp; availability</b>. Push Q-Comm placements, bundle deals, and loyalty re-buy nudges.`;
+          else             advice = `<b>Value play</b> · lean into <b>accessibility &amp; depth</b>. Multi-buy bundles, sachet/small SKUs, expansion into Tier 2/3 GT. Don't trade up; trade out.`;
+          return `<tr>
+            <td>${truncate(s.key,28)}</td>
+            <td>${s.Category}</td>
+            <td class="num">${s.OurAvgPrice.toFixed(0)}</td>
+            <td class="num">${mkt.toFixed(0)}</td>
+            <td class="num"><span class="tag ${prem>10?'blue':prem<-10?'amber':'grey'}">${fmtPct(prem)}</span></td>
+            <td>${advice}</td>
+          </tr>`;
+        }).join('')}
+        </tbody></table>
+        <div class="insight" style="margin-top:10px">💡 <b>Reading the table:</b> e.g. if our coffee sells at <b>₹170</b> but market avg is <b>₹100</b>, we're +70% — that's premium territory and we should brand it like one (story, ritual, packaging), not discount toward the market average.</div>
+      </div>
+
+      <!-- Row 3: Regulatory & USP -->
+      <div class="grid-eq" style="margin-top:14px">
+        <div class="card"><h4>📜 Regulatory Tracker · per category (edit)</h4>
+          <table class="data"><thead><tr><th>Category</th><th>Regulatory note / change</th><th>Impact</th></tr></thead><tbody>
+          ${byCat.map(c=>`<tr>
+            <td><b>${c.key}</b></td>
+            <td><input type="text" data-cat="${c.key}" data-key="regulatory" value="${escapeAttr(C.regulatory[c.key])}" oninput="updateCompetitor(this)" style="width:100%;padding:5px 7px;border:1px solid var(--line-strong);border-radius:3px;font-size:12px"/></td>
+            <td><span class="tag ${C.regulatory[c.key]&&C.regulatory[c.key]!=='—'?'amber':'grey'}">${C.regulatory[c.key]&&C.regulatory[c.key]!=='—'?'MONITOR':'NONE'}</span></td>
+          </tr>`).join('')}
+          </tbody></table>
+          <div class="micro">Pre-seeded with common India FMCG rules: FSSAI HFSS labelling, sugar-tax review, BIS cosmetic claims, FoP warnings.</div>
+        </div>
+        <div class="card"><h4>⚡ USP / Differentiation · per category (edit)</h4>
+          <table class="data"><thead><tr><th>Category</th><th>USP / hook</th><th>Anchor on</th></tr></thead><tbody>
+          ${byCat.map(c=>`<tr>
+            <td><b>${c.key}</b></td>
+            <td><input type="text" data-cat="${c.key}" data-key="usp" value="${escapeAttr(C.usp[c.key])}" oninput="updateCompetitor(this)" style="width:100%;padding:5px 7px;border:1px solid var(--line-strong);border-radius:3px;font-size:12px"/></td>
+            <td><span class="tag blue">${uspAnchor(C.usp[c.key])}</span></td>
+          </tr>`).join('')}
+          </tbody></table>
+          <div class="micro">Anchor on a single defensible lever: <b>price · taste · convenience · ingredient · ritual · packaging · sustainability</b>. Echo it in pack copy + media.</div>
+        </div>
+      </div>
+
+      <!-- Row 4: AI insights -->
+      <div class="grid-3" style="margin-top:14px">
+        <div class="card"><h4>🤖 AI · Market Gaps</h4>
+          ${gaps.map(g=>`<div class="insight">${g}</div>`).join('')}
+        </div>
+        <div class="card"><h4>🚀 AI · Emerging Trends</h4>
+          ${emerging.length ? emerging.map(t=>`<div class="insight good">📈 <b>${t.cat}</b> rising · slope <b>${(t.slope*100).toFixed(1)}%/mo</b>. Accelerate listings, secure Q-Comm placements, push first-mover creatives.</div>`).join('') : '<div class="micro">No category rising sharply yet.</div>'}
+          ${declining.length ? declining.map(t=>`<div class="insight warn">📉 <b>${t.cat}</b> declining · slope <b>${(t.slope*100).toFixed(1)}%/mo</b>. Diagnose: shelf-share, promo intensity, new entrants.</div>`).join('') : ''}
+        </div>
+        <div class="card"><h4>⚠️ AI · Competitive Threats</h4>
+          ${threats.map(t=>`<div class="insight bad">${t}</div>`).join('')}
+        </div>
+      </div>
+
+      <button class="pill-btn" style="max-width:280px;margin-top:14px" onclick="renderCompetition()">↻ Recompute insights from edits</button>
+
+      <div class="card" style="margin-top:14px"><h4>Category Trend · monthly revenue</h4>
+        <div class="chart-wrap"><canvas id="ch-comp-trend"></canvas></div>
+      </div>
+    </div>`;
+
+  // Charts
+  chart('ch-comp-gap',{
+    type:'bar',
+    data:{labels:byCat.map(c=>c.key),datasets:[
+      {label:'Our ₹/unit',   data:byCat.map(c=>c.OurAvgPrice), backgroundColor:'#c8102e'},
+      {label:'Market ₹/unit',data:byCat.map(c=>c.MarketPrice), backgroundColor:'#0c0d10'},
+    ]},
+    options:chartOpts({legend:true})
+  });
+
+  const top8 = bySku.slice(0,8);
+  const otherRev = bySku.slice(8).reduce((s,r)=>s+r.Revenue,0);
+  const shareLabels = top8.map(s=>truncate(s.key,20)).concat(otherRev>0?['Other SKUs']:[]);
+  const shareData   = top8.map(s=>s.Revenue).concat(otherRev>0?[otherRev]:[]);
+  chart('ch-comp-share',{
+    type:'doughnut',
+    data:{labels:shareLabels,datasets:[{data:shareData,backgroundColor:palette(shareLabels.length)}]},
+    options:chartOpts({legend:true})
+  });
+
+  chart('ch-comp-trend',{
+    type:'line',
+    data:{labels:months,datasets:cats.map((c,i)=>({label:c,data:months.map(m=>monthCat[m][c]||0),borderColor:palette(cats.length)[i],backgroundColor:palette(cats.length)[i]+'22',tension:.3,fill:false}))},
+    options:chartOpts({legend:true})
+  });
+}
+
+function updateCompetitor(el){
+  const cat = el.dataset.cat;
+  const key = el.dataset.key;
+  const val = el.type==='number' ? (parseFloat(el.value)||0) : el.value;
+  if(!STATE.competitor) STATE.competitor = {marketAvgPrice:{}, regulatory:{}, usp:{}};
+  STATE.competitor[key][cat] = val;
+}
+function escapeAttr(s){ return String(s||'').replace(/"/g,'&quot;'); }
+function uspAnchor(s){
+  const t=(s||'').toLowerCase();
+  if(/price|value|afford|cheap/.test(t)) return 'PRICE';
+  if(/taste|flavor|flavour|delicious/.test(t)) return 'TASTE';
+  if(/conven|quick|ready|instant/.test(t)) return 'CONVENIENCE';
+  if(/clean|organic|herbal|ayur|natural|ingredient|protein|sugar|fruit/.test(t)) return 'INGREDIENT';
+  if(/pack|design|sustain|eco/.test(t)) return 'PACKAGING';
+  if(/ritual|experience|premium|craft|origin/.test(t)) return 'RITUAL';
+  return 'TRUST';
+}
+
+/* ===================================================================== */
+/* ===== MODULE 9 — EXPANSION ============================================ */
+/* ===================================================================== */
+function renderExpansion(){
+  const rs = STATE.filtered;
+  const pane = document.getElementById('pane-expansion');
+  const regions = aggByGroup(rs,'Region',['Revenue','Units']);
+  const totalRev = sumBy(rs,r=>r.Revenue);
+  regions.forEach(r=>{r.Share=(r.Revenue/Math.max(totalRev,1))*100});
+
+  // Period split for growth calcs
+  const {p1,p2} = periodSplit(rs);
+  const r1 = aggByGroup(p1,'Region',['Revenue']);
+  const r2 = aggByGroup(p2,'Region',['Revenue']);
+  const rmap = {};
+  r1.forEach(r=>rmap[r.key]={p1:r.Revenue,p2:0});
+  r2.forEach(r=>{rmap[r.key]=rmap[r.key]||{p1:0,p2:0};rmap[r.key].p2=r.Revenue});
+  const regionGrowth = Object.entries(rmap).map(([k,v])=>({key:k,g:v.p1>0?((v.p2-v.p1)/v.p1)*100:(v.p2>0?100:0)}));
+
+  // --- Personas (period-aware, with growth) ---
+  const personaDefs = [
+    {p:'Premium Buyers',       desc:'AOV in top 30%ile',                  key:'Premium', action:'VIP UPGRADE',        msg:'Exclusive early access · limited editions · concierge service · invite-only premium tier · "first to know" drops'},
+    {p:'Value-Conscious',      desc:'Avg discount ≥ 20%',                  key:'Value',   action:'BUNDLE PROMO',       msg:'Best-price guarantee · multi-buy bundles · cashback loyalty · "Smart Buys of the Week" emails · combo packs'},
+    {p:'Gen-Z Trend Buyers',   desc:'Bought via Q-Comm / Indirect',        key:'GenZ',    action:'INFLUENCER DROP',    msg:'Trending now · UGC + influencer reels · 11-min Blinkit drops · meme-led storytelling · limited collabs'},
+    {p:'Health-Conscious',     desc:'Buys Healthy Snacks / Tea / Coffee',  key:'Health',  action:'WELLNESS LAUNCH',    msg:'Clean-label callouts · sugar &amp; protein transparency · wellness journey emails · subscription auto-replenish'},
+    {p:'Tier 2/3 Aspirational',desc:'Tier 2/3 regions',                    key:'Tier23',  action:'VERNACULAR ROLLOUT', msg:'Regional flavor variants · vernacular comms · "afford-the-aspiration" entry SKUs · local-hero packaging'},
+  ];
+  const personaP1 = computePersonas(p1);
+  const personaP2 = computePersonas(p2);
+  const personaNow = computePersonas(rs);
+  personaDefs.forEach(p=>{
+    p.count = personaNow[p.key];
+    if(personaP1[p.key] > 0){
+      p.growth = ((personaP2[p.key] - personaP1[p.key]) / personaP1[p.key]) * 100;
+    } else {
+      p.growth = personaP2[p.key] > 0 ? 100 : 0;
+    }
+  });
+
+  // --- SKU growth → marketing spend allocation ---
+  const skuStat = {};
+  p1.forEach(r=>{(skuStat[r.Product]=skuStat[r.Product]||{p1:0,p2:0,cat:r.Category,rev:0}).p1 += r.Units;});
+  p2.forEach(r=>{(skuStat[r.Product]=skuStat[r.Product]||{p1:0,p2:0,cat:r.Category,rev:0}).p2 += r.Units;});
+  rs.forEach(r=>{(skuStat[r.Product]=skuStat[r.Product]||{p1:0,p2:0,cat:r.Category,rev:0}).rev += r.Revenue;});
+  const skuGrowth = Object.entries(skuStat).map(([k,v])=>({
+    product:k, cat:v.cat, p1:v.p1, p2:v.p2, rev:v.rev,
+    growth: v.p1>0 ? ((v.p2-v.p1)/v.p1)*100 : (v.p2>0?100:0),
+  }));
+  // Spend % = (max(0,growth)+5) / sum, normalized — baseline + bias toward winners
+  const totalW = skuGrowth.reduce((s,r)=>s+Math.max(0,r.growth)+5,0);
+  skuGrowth.forEach(r=>{
+    r.spend = ((Math.max(0,r.growth)+5)/Math.max(totalW,1))*100;
+    r.tier = r.growth>=30?'SCALE':r.growth>=10?'GROW':r.growth>=0?'MAINTAIN':'SUNSET';
+  });
+  skuGrowth.sort((a,b)=>b.growth-a.growth);
+
+  // --- Upsell engine: customers loyal to a low-tier SKU → premium SKU in same category ---
+  const cust = groupBy(rs, r=>r.Customer);
+  const upsells = [];
+  Object.entries(cust).forEach(([c,rows])=>{
+    const cnt = {};
+    rows.forEach(r=>{cnt[r.Product]=(cnt[r.Product]||0)+1;});
+    const top = Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
+    if(!top || top[1] < 3) return;          // need ≥3 repeat buys of the same SKU
+    const [sku,n] = top;
+    const ref = rows.find(r=>r.Product===sku);
+    const cat = ref.Category, cur = ref['Base Price'] || 0;
+    if(!cur) return;
+    // Premium = cheapest SKU in same category priced strictly higher
+    const candidates = STATE.clean.filter(r=>r.Category===cat && (r['Base Price']||0) > cur);
+    if(!candidates.length) return;
+    candidates.sort((a,b)=>a['Base Price']-b['Base Price']);
+    const prem = candidates[0];
+    upsells.push({
+      customer:c, region:ref.Region,
+      currentSku:sku, purchases:n, currentPrice:cur,
+      premiumSku:prem.Product, premiumPrice:prem['Base Price'],
+      upsidePct: ((prem['Base Price']-cur)/cur)*100,
+    });
+  });
+  upsells.sort((a,b)=>(b.purchases*b.upsidePct)-(a.purchases*a.upsidePct));
+  const topUpsells = upsells.slice(0,12);
+
+  pane.innerHTML = `
+    <div class="section">
+      <h3>9 · Customer &amp; Market Expansion Intelligence</h3>
+      <div class="sub-h">Whitespace · personas + growth · marketing playbooks · spend allocation · upsell engine</div>
+
+      <div class="grid-eq">
+        <div class="card"><h4>Regional Whitespace (low share + high growth)</h4>
+          <div class="chart-wrap"><canvas id="ch-exp-region"></canvas></div>
+          <div class="insight good">🤖 Focus expansion on regions in upper-left of bubble (low current share, high growth).</div>
+        </div>
+        <div class="card"><h4>AI Persona Segmentation · with growth</h4>
+          <table class="data"><thead><tr><th>Persona</th><th>Signal</th><th class="num">Count</th><th class="num">Growth (P1→P2)</th><th>Action</th></tr></thead><tbody>
+          ${personaDefs.map(p=>`<tr>
+            <td><b>${p.p}</b></td>
+            <td>${p.desc}</td>
+            <td class="num">${fmt(p.count)}</td>
+            <td class="num"><span class="tag ${p.growth>=10?'green':p.growth>=0?'amber':'red'}">${fmtPct(p.growth)}</span></td>
+            <td><span class="tag ${p.growth>=10?'green':p.growth>=0?'blue':'amber'}">${p.growth<0?'WIN-BACK · ':p.growth>=10?'SCALE · ':''}${p.action}</span></td>
+          </tr>`).join('')}
+          </tbody></table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:14px"><h4>Persona Marketing Playbooks · custom message per segment</h4>
+        <table class="data"><thead><tr><th>Persona</th><th>Message &amp; channel</th><th class="num">Reach</th><th class="num">Growth</th></tr></thead><tbody>
+        ${personaDefs.map(p=>`<tr>
+          <td style="min-width:140px"><b>${p.p}</b><div class="micro" style="margin-top:2px;color:var(--muted)">${p.desc}</div></td>
+          <td>${p.msg}</td>
+          <td class="num">${fmt(p.count)}</td>
+          <td class="num"><span class="tag ${p.growth>=10?'green':p.growth>=0?'amber':'red'}">${fmtPct(p.growth)}</span></td>
+        </tr>`).join('')}
+        </tbody></table>
+        <div class="insight good" style="margin-top:10px">🤖 <b>AI says:</b> Prioritize <b>${[...personaDefs].sort((a,b)=>b.growth-a.growth)[0].p}</b> next quarter — fastest growing segment at <b>${fmtPct([...personaDefs].sort((a,b)=>b.growth-a.growth)[0].growth)}</b>.</div>
+      </div>
+
+      <div class="card" style="margin-top:14px"><h4>SKU Growth → Recommended Marketing Spend Allocation</h4>
+        <div class="chart-wrap"><canvas id="ch-exp-spend"></canvas></div>
+        <table class="data" style="margin-top:10px"><thead><tr><th>SKU</th><th>Category</th><th class="num">P1 units</th><th class="num">P2 units</th><th class="num">Growth</th><th class="num">Spend %</th><th>Strategy</th></tr></thead><tbody>
+        ${skuGrowth.map(s=>`<tr>
+          <td>${s.product}</td>
+          <td>${s.cat}</td>
+          <td class="num">${fmt(s.p1)}</td>
+          <td class="num">${fmt(s.p2)}</td>
+          <td class="num"><span class="tag ${s.growth>=10?'green':s.growth>=0?'amber':'red'}">${fmtPct(s.growth)}</span></td>
+          <td class="num"><b>${s.spend.toFixed(1)}%</b></td>
+          <td><span class="tag ${s.tier==='SCALE'?'green':s.tier==='GROW'?'blue':s.tier==='MAINTAIN'?'amber':'red'}">${s.tier}</span></td>
+        </tr>`).join('')}
+        </tbody></table>
+        <div class="micro" style="margin-top:8px">Formula: <code>weight = max(0, growth%) + 5 baseline</code>, then normalized to 100% across SKUs. Fast growers get more, every SKU keeps a floor.</div>
+      </div>
+
+      <div class="card" style="margin-top:14px"><h4>Cross-sell · Category Affinity</h4>
+        ${crossSell(rs)}
+      </div>
+
+      <div class="card" style="margin-top:14px"><h4>🎯 Upsell Engine · loyal-to-SKU customers → premium SKU migration</h4>
+        ${topUpsells.length ? `
+        <table class="data"><thead><tr><th>Customer</th><th>Region</th><th>Currently buying ×N</th><th class="num">Current ₹</th><th>Recommend premium SKU</th><th class="num">Premium ₹</th><th class="num">Uplift</th><th>Strategy</th></tr></thead><tbody>
+        ${topUpsells.map(u=>`<tr>
+          <td><b>${u.customer}</b></td>
+          <td>${u.region}</td>
+          <td>${u.currentSku} <span class="tag grey">×${u.purchases}</span></td>
+          <td class="num">${fmtMoney(u.currentPrice)}</td>
+          <td>${u.premiumSku}</td>
+          <td class="num">${fmtMoney(u.premiumPrice)}</td>
+          <td class="num"><span class="tag green">+${u.upsidePct.toFixed(0)}%</span></td>
+          <td><span class="tag blue">DISCOUNT × 1–2 → ACQUIRE</span></td>
+        </tr>`).join('')}
+        </tbody></table>
+        <div class="insight good" style="margin-top:10px">🤖 <b>Playbook:</b> Offer 1–2 introductory-priced trials of the premium SKU. Once the customer adopts at the higher price point, withdraw the discount — net effect is a permanent shift up the ladder at <b>+${avg(topUpsells.map(u=>u.upsidePct)).toFixed(0)}%</b> average price uplift.</div>
+        ` : `<div class="micro">No customers found with ≥ 3 repeat purchases of the same SKU and a higher-tier SKU available in that category.</div>`}
+      </div>
+    </div>`;
+
+  // Bubble chart: x=share, y=growth, r=units
+  const bubble = regions.map(r=>{
+    const g = regionGrowth.find(g=>g.key===r.key);
+    return {x:r.Share, y:g?g.g:0, r:Math.min(40,Math.max(6,Math.sqrt(r.Units)/4)), label:r.key};
+  });
+  chart('ch-exp-region',{
+    type:'bubble',
+    data:{datasets:[{label:'Region',data:bubble,backgroundColor:'rgba(200,16,46,.55)',borderColor:'#c8102e'}]},
+    options:{...chartOpts({legend:false}),plugins:{legend:{display:false},tooltip:{callbacks:{label:(c)=>`${c.raw.label}: share ${c.raw.x.toFixed(1)}%, growth ${c.raw.y.toFixed(1)}%`}}},scales:{x:{title:{display:true,text:'Revenue Share %'}},y:{title:{display:true,text:'Growth %'}}}}
+  });
+
+  // SKU growth vs spend allocation
+  chart('ch-exp-spend',{
+    type:'bar',
+    data:{labels:skuGrowth.map(s=>truncate(s.product,20)),datasets:[
+      {label:'Growth %',data:skuGrowth.map(s=>s.growth),backgroundColor:skuGrowth.map(s=>s.growth>=10?'#1f7a4c':s.growth>=0?'#b87900':'#b3261e'),yAxisID:'y'},
+      {label:'Recommended Spend %',data:skuGrowth.map(s=>s.spend),backgroundColor:'rgba(200,16,46,.45)',type:'line',borderColor:'#c8102e',tension:.3,yAxisID:'y1'},
+    ]},
+    options:{...chartOpts({legend:true}),scales:{y:{position:'left',title:{display:true,text:'Growth %'}},y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'Spend %'}}}}
+  });
+}
+
+function computePersonas(rs){
+  // Customer-level metrics within the given period only
+  const byC = groupBy(rs, r=>r.Customer);
+  const cs = Object.entries(byC).map(([c, rows])=>{
+    const rev = sumBy(rows, r=>r.Revenue);
+    const orders = rows.length;
+    return {
+      Customer:c,
+      AOV: orders>0 ? rev/orders : 0,
+      avgDisc: rows.length ? sumBy(rows, r=>r.Discount||0)/rows.length : 0,
+      indirect: rows.some(r=>r['Channel Type']==='Indirect'),
+      healthy:  rows.some(r=>/health|tea|coffee/i.test(r.Category||'')),
+      tier23:   rows.some(r=>/tier|north east|tier ?2|tier ?3/i.test(r.Region||'')),
+    };
+  });
+  if(!cs.length) return {Premium:0,Value:0,GenZ:0,Health:0,Tier23:0};
+  const p70 = pctile(cs.map(c=>c.AOV), .7);
+  return {
+    Premium: cs.filter(c=>c.AOV>=p70).length,
+    Value:   cs.filter(c=>c.avgDisc>=20).length,
+    GenZ:    cs.filter(c=>c.indirect).length,
+    Health:  cs.filter(c=>c.healthy).length,
+    Tier23:  cs.filter(c=>c.tier23).length,
+  };
+}
+
+function crossSell(rs){
+  // Affinity by customer: customers who buy A also buy B
+  const cust = groupBy(rs,r=>r.Customer);
+  const pairs = {};
+  Object.values(cust).forEach(rows=>{
+    const cats = uniq(rows.map(r=>r.Category)).filter(Boolean);
+    for(let i=0;i<cats.length;i++) for(let j=i+1;j<cats.length;j++){
+      const key = [cats[i],cats[j]].sort().join(' + ');
+      pairs[key]=(pairs[key]||0)+1;
+    }
+  });
+  const top = Object.entries(pairs).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if(!top.length) return '<div class="micro">Not enough multi-category customers to compute affinity.</div>';
+  return `<table class="data"><thead><tr><th>Category Pair</th><th class="num">Co-buying customers</th><th>Action</th></tr></thead><tbody>
+  ${top.map(([k,v])=>`<tr><td>${k}</td><td class="num">${v}</td><td><span class="tag green">BUNDLE / CROSS-SELL</span></td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+/* ===================================================================== */
+/* ===== CHART HELPERS =================================================== */
+/* ===================================================================== */
+function chartOpts(opts={}){
+  return {
+    responsive:true,maintainAspectRatio:false,
+    indexAxis: opts.horiz?'y':'x',
+    plugins:{legend:{display:!!opts.legend,position:'bottom',labels:{font:{family:'Inter',size:11},boxWidth:10,boxHeight:10}}},
+    scales:{y:{beginAtZero:true,grid:{color:'#f0efe9'},ticks:{font:{family:'Inter',size:11}}},x:{grid:{display:false},ticks:{font:{family:'Inter',size:11}}}},
+  };
+}
+function palette(n){
+  const c = ['#c8102e','#0c0d10','#1f4a83','#1f7a4c','#b87900','#7a5a00','#9c0d24','#3a3f47','#888','#b3261e'];
+  return Array(n).fill(0).map((_,i)=>c[i%c.length]);
+}
+
+/* ===================================================================== */
+/* ===== TAB SWITCHING =================================================== */
+/* ===================================================================== */
+document.getElementById('modNav').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('#modNav button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  const tab = e.target.dataset.tab;
+  document.querySelectorAll('.module-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pane-'+tab).classList.add('active');
+});
+document.querySelectorAll('.view-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    document.querySelectorAll('.view-card').forEach(c=>c.classList.remove('active'));
+    card.classList.add('active');
+    if(STATE.ready){
+      const m = card.dataset.module;
+      const btn = document.querySelector(`#modNav button[data-tab="${m}"]`);
+      if(btn) btn.click();
+      document.getElementById('dashboard').scrollIntoView({behavior:'smooth'});
+    }
+  });
+});
+
+/* ===================================================================== */
+/* ===== STEPPER ========================================================= */
+/* ===================================================================== */
+function setStep(n){
+  document.querySelectorAll('.step').forEach(s=>{
+    const v=+s.dataset.step;
+    s.classList.toggle('done', v<n);
+    s.classList.toggle('active', v===n);
+  });
+}
+function skipToStep2(){
+  document.getElementById('masterFile').click();
+}
+
+/* ===================================================================== */
+/* ===== EXPORTS ========================================================= */
+/* ===================================================================== */
+function downloadCleanXlsx(){
+  if(!STATE.clean){toast('Run Step 1 first');return;}
+  const ws = XLSX.utils.json_to_sheet(STATE.clean);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Master DB');
+  XLSX.writeFile(wb,'Master_DB_clean.xlsx');
+  toast('Master DB downloaded');
+}
+function downloadInsightsJson(){
+  const rs = STATE.filtered || STATE.clean || [];
+  const insights = {
+    generated: new Date().toISOString(),
+    filters: STATE.filters,
+    totals:{ rows:rs.length, revenue:sumBy(rs,r=>r.Revenue), profit:sumBy(rs,r=>r.Profit), units:sumBy(rs,r=>r.Units) },
+    topSku: aggByGroup(rs,'Product',['Revenue']).slice(0,10),
+    topRegion: aggByGroup(rs,'Region',['Revenue']),
+    topChannel: aggByGroup(rs,'Channel',['Revenue']),
+    vendors: aggByGroup(rs,'Vendor',['Revenue']),
+  };
+  const blob = new Blob([JSON.stringify(insights,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='insights.json'; a.click();
+  URL.revokeObjectURL(url);
+  toast('Insights JSON downloaded');
+}
+
+async function exportPPTX(){
+  if(!STATE.ready){toast('Generate dashboard first');return;}
+  toast('Building PPTX…');
+  const pptx = new PptxGenJS();
+  pptx.layout='LAYOUT_WIDE';
+  pptx.title='Revenue Growth OS';
+  pptx.company='RGM:IQ';
+
+  // Title slide
+  let s = pptx.addSlide();
+  s.background={color:'0C0D10'};
+  s.addText('AI-Powered Revenue Growth\nOperating System',{x:.5,y:1.5,w:12,h:2,fontFace:'Calibri',fontSize:48,bold:true,color:'FFFFFF'});
+  s.addText('Consumer Brand · '+new Date().toLocaleDateString(),{x:.5,y:4.5,w:12,h:.5,fontSize:18,color:'C8102E'});
+  s.addShape(pptx.ShapeType.rect,{x:.5,y:6.5,w:1.8,h:.4,fill:{color:'C8102E'}});
+  s.addText('RGM:IQ · BETA',{x:.5,y:6.5,w:1.8,h:.4,fontSize:11,bold:true,color:'FFFFFF',align:'center',valign:'middle'});
+
+  // KPI slide
+  const rs = STATE.filtered;
+  const totalRev = sumBy(rs,r=>r.Revenue);
+  const totalProf = sumBy(rs,r=>r.Profit);
+  const units = sumBy(rs,r=>r.Units);
+  const totalCust = uniq(rs.map(r=>r.Customer)).length;
+  s = pptx.addSlide();
+  s.addText('Executive KPIs',{x:.5,y:.3,w:12,h:.6,fontSize:28,bold:true,color:'0C0D10'});
+  const tiles=[
+    {l:'Total Revenue',v:fmtMoney(totalRev)},
+    {l:'Profit Margin',v:(totalRev>0?(totalProf/totalRev*100).toFixed(1):'0')+'%'},
+    {l:'Units Sold',v:fmt(units)},
+    {l:'Active Customers',v:fmt(totalCust)},
+  ];
+  tiles.forEach((t,i)=>{
+    const x = .5+i*3.1;
+    s.addShape(pptx.ShapeType.rect,{x,y:1.5,w:2.9,h:2,line:{color:'E5E4DF',width:.75},fill:{color:'FFFFFF'}});
+    s.addShape(pptx.ShapeType.rect,{x,y:1.5,w:.05,h:2,fill:{color:'C8102E'}});
+    s.addText(t.l,{x:x+.2,y:1.7,w:2.6,h:.4,fontSize:11,bold:true,color:'6B7280'});
+    s.addText(t.v,{x:x+.2,y:2.1,w:2.6,h:1.2,fontSize:36,bold:true,color:'0C0D10'});
+  });
+
+  // Capture each chart as image
+  const moduleSlides = [
+    {tab:'revenue', title:'1 · Revenue Analytics', charts:['ch-rev-monthly','ch-rev-region','ch-rev-channel']},
+    {tab:'sku', title:'2 · SKU Intelligence', charts:['ch-sku-winners','ch-sku-losers','ch-sku-grow']},
+    {tab:'marketing', title:'3 · Marketing Efficiency', charts:['ch-mkt-rev','ch-mkt-roas']},
+    {tab:'customer', title:'4 · Customer Intelligence', charts:['ch-cust-tier','ch-cust-clv']},
+    {tab:'supply', title:'5 · Supply Chain', charts:['ch-sup-wh','ch-sup-vendor']},
+    {tab:'pricing', title:'6 · Pricing & Discounting', charts:['ch-price-elast','ch-price-pressure']},
+    {tab:'shelf', title:'7 · Shelf & Packaging', charts:['ch-shelf-pack']},
+    {tab:'competition', title:'8 · Competition', charts:['ch-comp-price','ch-comp-trend']},
+    {tab:'expansion', title:'9 · Market Expansion', charts:['ch-exp-region']},
+  ];
+  for(const m of moduleSlides){
+    const btn = document.querySelector(`#modNav button[data-tab="${m.tab}"]`);
+    if(btn) btn.click();
+    await new Promise(r=>setTimeout(r,250));
+    s = pptx.addSlide();
+    s.addText(m.title,{x:.5,y:.3,w:12,h:.6,fontSize:24,bold:true,color:'0C0D10'});
+    s.addShape(pptx.ShapeType.rect,{x:.5,y:.95,w:.8,h:.06,fill:{color:'C8102E'}});
+    for(let i=0;i<m.charts.length;i++){
+      const c = STATE.charts[m.charts[i]];
+      if(!c) continue;
+      try{
+        const img = c.toBase64Image('image/png');
+        const cols = m.charts.length>2?3:2;
+        const w = (13.3-.7)/cols - .2;
+        const h = 3.6;
+        const x = .5 + (i%cols)*(w+.2);
+        const y = 1.2 + Math.floor(i/cols)*(h+.2);
+        s.addImage({data:img,x,y,w,h});
+      }catch(e){console.warn(e);}
+    }
+  }
+
+  // AI insights slide
+  s = pptx.addSlide();
+  s.addText('AI-Generated Executive Insights',{x:.5,y:.3,w:12,h:.6,fontSize:28,bold:true,color:'0C0D10'});
+  s.addShape(pptx.ShapeType.rect,{x:.5,y:.95,w:.8,h:.06,fill:{color:'C8102E'}});
+  const insights = generateInsights();
+  insights.forEach((ins,i)=>{
+    const y = 1.3+i*.85;
+    s.addShape(pptx.ShapeType.rect,{x:.5,y,w:12.3,h:.75,fill:{color:'FAFAF8'},line:{color:'E5E4DF',width:.5}});
+    s.addShape(pptx.ShapeType.rect,{x:.5,y,w:.06,h:.75,fill:{color:'C8102E'}});
+    s.addText(ins,{x:.7,y:y+.05,w:12.0,h:.65,fontSize:13,color:'111418'});
+  });
+
+  await pptx.writeFile({fileName:`Revenue_Growth_OS_${Date.now()}.pptx`});
+  toast('PPTX deck downloaded');
+  setStep(7);
+}
+
+function generateInsights(){
+  const rs = STATE.filtered;
+  const out = [];
+  const {p1,p2} = periodSplit(rs);
+  const r1 = sumBy(p1,r=>r.Revenue), r2 = sumBy(p2,r=>r.Revenue);
+  const g = r1>0 ? ((r2-r1)/r1)*100 : 0;
+  out.push(`📈 Revenue is ${g>=0?'growing':'shrinking'} at ${fmtPct(g)} period-over-period — driven by ${topGrowthDriver(p1,p2)}.`);
+  const skuAgg = aggByGroup(rs,'Product',['Revenue','Profit']);
+  if(skuAgg[0]) out.push(`🏷 Top revenue SKU is ${skuAgg[0].key} at ${fmtMoney(skuAgg[0].Revenue)} — represents ${((skuAgg[0].Revenue/Math.max(sumBy(rs,r=>r.Revenue),1))*100).toFixed(1)}% of total.`);
+  const dead = uniq(rs.filter(r=>r['Dead Inventory']==='Yes').map(r=>r.Product));
+  if(dead.length) out.push(`🧨 ${dead.length} SKU(s) sit dead in inventory (no sale 90+ days). Consider clearance or discontinuation.`);
+  const churnHigh = uniq(rs.filter(r=>r['Churn Risk']==='High').map(r=>r.Customer)).length;
+  if(churnHigh) out.push(`⚠️ ${churnHigh} customer(s) are at HIGH churn risk — trigger win-back program.`);
+  const vendors = aggByGroup(rs,'Vendor',['Revenue']);
+  const totRev = sumBy(rs,r=>r.Revenue);
+  const highDep = vendors.filter(v=>(v.Revenue/Math.max(totRev,1)*100) > 100/Math.max(vendors.length,1));
+  if(highDep.length) out.push(`🏭 Vendor concentration risk: ${highDep[0].key} carries ${((highDep[0].Revenue/Math.max(totRev,1))*100).toFixed(1)}% of supply — onboard alternates.`);
+  return out.slice(0,6);
+}
+
+/* ===================================================================== */
+/* ===== EVENTS ========================================================== */
+/* ===================================================================== */
+function bindDrop(zoneId, inputId, handler){
+  const zone = document.getElementById(zoneId);
+  const input = document.getElementById(inputId);
+  zone.addEventListener('dragover', e=>{e.preventDefault();zone.classList.add('dragover')});
+  zone.addEventListener('dragleave', e=>zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e=>{
+    e.preventDefault(); zone.classList.remove('dragover');
+    const f = e.dataTransfer.files[0]; if(f) handler(f);
+  });
+  input.addEventListener('change', e=>{
+    const f = e.target.files[0]; if(f) handler(f);
+  });
+}
+bindDrop('dropRaw','rawFile', handleRawUpload);
+bindDrop('dropMaster','masterFile', handleMasterUpload);
+
+document.getElementById('btnFormat').addEventListener('click', ()=>{
+  cleanAndDerive();
+  if(STATE.clean){
+    downloadCleanXlsx();
+    // Auto-populate master DB
+    buildFilters();
+    document.getElementById('btnGenerate').disabled = false;
+    toast('Master DB formatted · '+STATE.clean.length+' rows');
+  }
+});
+document.getElementById('btnGenerate').addEventListener('click', ()=>{
+  applyFilters();
+  generateDashboard();
+});
+document.getElementById('btnExport').addEventListener('click', exportPPTX);
+
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function openAbout(){
+  document.getElementById('modalContent').innerHTML = `
+    <h3>About RGM:IQ — Revenue Growth Operating System</h3>
+    <p style="margin-top:8px;color:#3a3f47">An AI-powered analytics &amp; decision intelligence platform for consumer brands. Helps you:</p>
+    <ul style="color:#3a3f47">
+      <li>Increase revenue · improve profitability · optimize marketing spend</li>
+      <li>Predict demand · identify profitable SKUs · personalize discounting</li>
+      <li>Optimize supply chain · uncover whitespace customer segments</li>
+    </ul>
+    <h4 style="font-family:Inter;font-size:13px;letter-spacing:.1em;text-transform:uppercase;margin-top:14px">Engine</h4>
+    <p style="color:#3a3f47">Browser-side: SheetJS (Excel I/O), Chart.js (viz), PptxGenJS (deck). No data leaves your machine.</p>
+    <p style="color:#3a3f47">9 analysis modules · 5 filter dimensions · 1-click PPTX export.</p>
+  `;
+  document.getElementById('modal').classList.add('open');
+}
+
+/* Auto-update spend when input changes & user clicks Generate */
+window.updateSpend = updateSpend;
+window.applyFilters = applyFilters;
+window.openAbout = openAbout;
+window.skipToStep2 = skipToStep2;
+window.downloadCleanXlsx = downloadCleanXlsx;
+window.downloadInsightsJson = downloadInsightsJson;
+window.exportPPTX = exportPPTX;
+window.closeModal = closeModal;
+window.updateCompetitor = updateCompetitor;
+window.renderCompetition = renderCompetition;
+window.renderPricing = renderPricing;
+window.renderRevenue = renderRevenue;
+</script>
+</body>
+</html>
